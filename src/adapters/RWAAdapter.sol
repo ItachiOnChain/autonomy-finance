@@ -1,0 +1,200 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0;
+
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../interfaces/ITokenAdapter.sol";
+import "../interfaces/IERC20Minimal.sol";
+import "../oracles/RWAOracle.sol";
+import "../tokens/MintableBurnableERC20.sol";
+import "../base/FixedPointMath.sol";
+import "../base/Errors.sol";
+
+/// @notice RWA Adapter - ERC-4626-like semantics with NAV-based pricing
+/// @dev Uses RWAOracle for NAV updates instead of on-chain APY
+contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
+    using SafeERC20 for IERC20;
+    using FixedPointMath for uint256;
+
+    enum Status { Active, RedeemOnly, Blocked }
+
+    IERC20Minimal public immutable underlyingToken;
+    MintableBurnableERC20 public immutable _yieldToken;
+    RWAOracle public immutable rwaOracle;
+
+    Status public status;
+    uint256 public liquidityBuffer;
+    uint256 public bufferCap;
+
+    // Redemption queue
+    struct RedemptionRequest {
+        address user;
+        uint256 shares;
+        uint256 requestedAt;
+        bool processed;
+    }
+
+    mapping(uint256 => RedemptionRequest) public redemptionQueue;
+    uint256 public nextRedemptionId;
+    uint256 public processedRedemptionId;
+
+    event StatusUpdated(Status oldStatus, Status newStatus);
+    event LiquidityBufferUpdated(uint256 oldBuffer, uint256 newBuffer);
+    event RedemptionRequested(uint256 indexed claimId, address indexed user, uint256 shares);
+    event RedemptionProcessed(uint256 indexed claimId, uint256 assets);
+    event EmergencyWithdraw(address indexed token, address indexed to, uint256 amount);
+
+    constructor(
+        address initialOwner,
+        IERC20Minimal underlyingToken_,
+        string memory yieldTokenName,
+        string memory yieldTokenSymbol,
+        RWAOracle rwaOracle_
+    ) Ownable(initialOwner) {
+        underlyingToken = underlyingToken_;
+        _yieldToken = new MintableBurnableERC20(yieldTokenName, yieldTokenSymbol, 18);
+        _yieldToken.setMinter(address(this));
+        rwaOracle = rwaOracle_;
+        status = Status.Active;
+    }
+
+    /// @notice Get the yield token (implements ITokenAdapter interface)
+    function yieldToken() external view override returns (IERC20Minimal) {
+        return IERC20Minimal(address(_yieldToken));
+    }
+
+    /// @notice Get current exchange rate (yield token / underlying token) using NAV
+    function getExchangeRate() external view override returns (uint256) {
+        return rwaOracle.getNAV();
+    }
+
+    /// @notice Accrue RWA (validate staleness and pull latest NAV)
+    function accrue() external override {
+        // NAV is updated off-chain via RWAOracle.updateNAV()
+        // This function validates staleness
+        require(!rwaOracle.isStale(), "stale");
+    }
+
+    /// @notice Deposit underlying tokens and receive yield tokens
+    function deposit(uint256 amount, address recipient) external override nonReentrant returns (uint256) {
+        require(status == Status.Active, "deposits blocked");
+        require(!rwaOracle.isStale(), "stale");
+        
+        IERC20(address(underlyingToken)).safeTransferFrom(msg.sender, address(this), amount);
+        
+        uint256 nav = rwaOracle.getNAV();
+        uint256 shares = amount.wdiv(nav);
+        _yieldToken.mint(recipient, shares);
+        
+        return shares;
+    }
+
+    /// @notice Withdraw underlying tokens by burning yield tokens
+    function withdraw(uint256 shares, address recipient) external override nonReentrant returns (uint256) {
+        require(status != Status.Blocked, "withdrawals blocked");
+        require(!rwaOracle.isStale(), "stale");
+        
+        // Burn yield tokens from caller
+        _yieldToken.burnFrom(msg.sender, shares);
+        
+        uint256 nav = rwaOracle.getNAV();
+        uint256 amount = shares.wmul(nav);
+        
+        // Try instant redemption from buffer
+        if (amount <= liquidityBuffer) {
+            liquidityBuffer -= amount;
+            IERC20(address(underlyingToken)).safeTransfer(recipient, amount);
+            return amount;
+        }
+        
+        // Queue redemption if buffer insufficient
+        redemptionQueue[nextRedemptionId] = RedemptionRequest({
+            user: recipient,
+            shares: shares,
+            requestedAt: block.timestamp,
+            processed: false
+        });
+        
+        emit RedemptionRequested(nextRedemptionId, recipient, shares);
+        nextRedemptionId++;
+        
+        // Return partial amount from buffer if available
+        if (liquidityBuffer > 0) {
+            uint256 partialAmount = liquidityBuffer;
+            liquidityBuffer = 0;
+            IERC20(address(underlyingToken)).safeTransfer(recipient, partialAmount);
+            return partialAmount;
+        }
+        
+        return 0;
+    }
+
+    /// @notice Harvest yield (no-op for RWA, NAV updated off-chain)
+    function harvest() external override returns (uint256) {
+        require(!rwaOracle.isStale(), "stale");
+        return 0; // NAV updates happen off-chain
+    }
+
+    /// @notice Get total value locked in underlying terms
+    function totalValue() external view override returns (uint256) {
+        uint256 totalShares = _yieldToken.totalSupply();
+        uint256 nav = rwaOracle.getNAV();
+        return totalShares.wmul(nav);
+    }
+
+    /// @notice Convert shares to assets using NAV
+    function convertToAssets(uint256 shares) external view returns (uint256) {
+        uint256 nav = rwaOracle.getNAV();
+        return shares.wmul(nav);
+    }
+
+    /// @notice Convert assets to shares using NAV
+    function convertToShares(uint256 assets) external view returns (uint256) {
+        uint256 nav = rwaOracle.getNAV();
+        return assets.wdiv(nav);
+    }
+
+    /// @notice Process redemption from queue (owner/keeper)
+    function processRedemption(uint256 claimId, uint256 assets) external onlyOwner {
+        RedemptionRequest storage request = redemptionQueue[claimId];
+        require(!request.processed, "already processed");
+        require(request.user != address(0), "invalid request");
+        
+        request.processed = true;
+        IERC20(address(underlyingToken)).safeTransfer(request.user, assets);
+        
+        emit RedemptionProcessed(claimId, assets);
+    }
+
+    /// @notice Set adapter status
+    function setStatus(Status newStatus) external onlyOwner {
+        Status oldStatus = status;
+        status = newStatus;
+        emit StatusUpdated(oldStatus, newStatus);
+    }
+
+    /// @notice Add liquidity to buffer
+    function addLiquidityBuffer(uint256 amount) external {
+        IERC20(address(underlyingToken)).safeTransferFrom(msg.sender, address(this), amount);
+        liquidityBuffer += amount;
+        if (liquidityBuffer > bufferCap) {
+            bufferCap = liquidityBuffer;
+        }
+        emit LiquidityBufferUpdated(liquidityBuffer - amount, liquidityBuffer);
+    }
+
+    /// @notice Set buffer cap
+    function setBufferCap(uint256 cap) external onlyOwner {
+        bufferCap = cap;
+    }
+
+    /// @notice Emergency withdraw (owner-only)
+    function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner {
+        require(status == Status.Blocked || status == Status.RedeemOnly, "not emergency");
+        IERC20(token).safeTransfer(to, amount);
+        emit EmergencyWithdraw(token, to, amount);
+    }
+}
+

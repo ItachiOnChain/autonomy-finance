@@ -7,6 +7,8 @@ import "../src/adapters/Adapter.sol";
 import "../src/tokens/CollateralToken.sol";
 import "../src/tokens/AtAsset.sol";
 import "../src/interfaces/IERC20Minimal.sol";
+import "../src/interfaces/IPriceOracle.sol";
+import "../src/mocks/MockOracle.sol";
 
 /// @notice Deployment script for Mantle testnet
 contract DeployScript is Script {
@@ -16,6 +18,11 @@ contract DeployScript is Script {
 
         address deployer = vm.addr(deployerPrivateKey);
         console.log("Deploying from:", deployer);
+
+        // Deploy price oracle
+        console.log("Deploying MockOracle...");
+        MockOracle oracle = new MockOracle(deployer);
+        console.log("MockOracle deployed at:", address(oracle));
 
         // Deploy collateral token
         console.log("Deploying CollateralToken...");
@@ -30,6 +37,7 @@ contract DeployScript is Script {
         // Deploy Adapter
         console.log("Deploying Adapter...");
         Adapter adapter = new Adapter(
+            deployer,
             IERC20Minimal(address(collateral)),
             "Yield Token",
             "YT",
@@ -40,11 +48,12 @@ contract DeployScript is Script {
 
         // Deploy AutonomyV1
         console.log("Deploying AutonomyV1...");
-        AutonomyV1 autonomy = new AutonomyV1();
+        AutonomyV1 autonomy = new AutonomyV1(deployer, IPriceOracle(address(oracle)));
         console.log("AutonomyV1 deployed at:", address(autonomy));
 
-        // Setup: Transfer admin to deployer
-        autonomy.setAdmin(deployer);
+        // Set prices in oracle (default 1e18 = parity)
+        oracle.setPrice(address(collateral), 1e18);
+        oracle.setPrice(address(atAsset), 1e18);
 
         // Register yield token
         console.log("Registering yield token...");
@@ -61,12 +70,13 @@ contract DeployScript is Script {
         atAsset.setMinter(address(autonomy));
 
         console.log("\n=== Deployment Summary ===");
+        console.log("MockOracle:", address(oracle));
         console.log("CollateralToken:", address(collateral));
         console.log("AtAsset:", address(atAsset));
         console.log("Adapter:", address(adapter));
         console.log("YieldToken:", yieldToken);
         console.log("AutonomyV1:", address(autonomy));
-        console.log("Admin:", deployer);
+        console.log("Owner:", deployer);
 
         vm.stopBroadcast();
     }

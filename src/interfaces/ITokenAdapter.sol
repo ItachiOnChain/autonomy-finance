@@ -23,6 +23,10 @@ interface ITokenAdapter {
     /// @notice Harvest yield and update exchange rate
     function harvest() external returns (uint256);
 
+    /// @notice Accrue yield (update exchange rate/index)
+    /// @dev Called before state-changing operations to prevent stale index manipulation
+    function accrue() external;
+
     /// @notice Get the total value locked in underlying terms
     function totalValue() external view returns (uint256);
 }
