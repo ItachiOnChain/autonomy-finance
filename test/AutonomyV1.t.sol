@@ -259,9 +259,12 @@ contract AutonomyV1Test is Test {
         uint256 shares = autonomy.deposit(address(adapter.yieldToken()), depositAmount, user);
         autonomy.mint(address(atAsset), 500e18, user);
         
+        // Cache yield token address before expectRevert
+        address yieldToken = address(adapter.yieldToken());
+        
         // Try to withdraw too much (should revert with InsufficientCollateral)
         vm.expectRevert(Errors.InsufficientCollateral.selector);
-        autonomy.withdraw(address(adapter.yieldToken()), shares, user);
+        autonomy.withdraw(yieldToken, shares, user);
         
         vm.stopPrank();
     }
@@ -283,10 +286,13 @@ contract AutonomyV1Test is Test {
         autonomy.pauseFunction(depositSelector);
         vm.stopPrank();
         
+        // Cache yield token address before expectRevert
+        address yieldToken = address(adapter.yieldToken());
+        
         // Deposit should revert with Paused (whitelist check passes since whitelist is not set)
         vm.startPrank(user);
         vm.expectRevert(Errors.Paused.selector);
-        autonomy.deposit(address(adapter.yieldToken()), 100e18, user);
+        autonomy.deposit(yieldToken, 100e18, user);
         
         vm.stopPrank();
     }
@@ -311,10 +317,13 @@ contract AutonomyV1Test is Test {
         whitelist.set(user, false);
         vm.stopPrank();
         
+        // Cache yield token address before expectRevert
+        address yieldToken = address(adapter.yieldToken());
+        
         // User should not be able to deposit
         vm.startPrank(user);
         vm.expectRevert(Errors.NotWhitelisted.selector);
-        autonomy.deposit(address(adapter.yieldToken()), 100e18, user);
+        autonomy.deposit(yieldToken, 100e18, user);
         
         vm.stopPrank();
     }

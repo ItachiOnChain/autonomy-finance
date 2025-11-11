@@ -252,7 +252,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address yieldToken,
         uint256 amount,
         address recipient
-    ) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("deposit(address,uint256,address)")))) onlyWhitelisted returns (uint256) {
+    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("deposit(address,uint256,address)")))) returns (uint256) {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
         if (amount == 0) revert Errors.InvalidAmount();
@@ -276,7 +276,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address yieldToken,
         uint256 shares,
         address recipient
-    ) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("withdraw(address,uint256,address)")))) onlyWhitelisted returns (uint256) {
+    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("withdraw(address,uint256,address)")))) returns (uint256) {
         if (shares == 0) revert Errors.InvalidAmount();
         if (depositedShares[msg.sender][yieldToken] < shares) revert Errors.InsufficientBalance();
 
@@ -287,22 +287,19 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         _accrue(yieldToken);
 
         // Check if withdrawal would make position undercollateralized
-        uint256 collateralValue = getCollateralValue(msg.sender);
         uint256 debtValue = getDebtValue(msg.sender);
         
         if (debtValue > 0) {
+            uint256 collateralValue = getCollateralValue(msg.sender);
             uint256 exchangeRate = adapter.getExchangeRate();
             IERC20Minimal underlying = adapter.underlyingToken();
             uint256 price = oracle.priceInDebt(address(underlying));
             uint256 sharesValue = shares.wmul(exchangeRate).wmul(price);
             
-            if (sharesValue > collateralValue) {
-                revert Errors.InsufficientCollateral();
-            }
             uint256 newCollateralValue = collateralValue - sharesValue;
             
-            // If new collateral is 0 or ratio is below minimum, revert
-            if (newCollateralValue == 0 || newCollateralValue.wdiv(debtValue) < MINIMUM_COLLATERALIZATION_RATIO) {
+            // Check if new ratio is below minimum
+            if (newCollateralValue.wdiv(debtValue) < MINIMUM_COLLATERALIZATION_RATIO) {
                 revert Errors.InsufficientCollateral();
             }
         }
@@ -321,7 +318,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address debtToken,
         uint256 amount,
         address recipient
-    ) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("mint(address,uint256,address)")))) onlyWhitelisted {
+    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("mint(address,uint256,address)")))) {
         if (amount == 0) revert Errors.InvalidAmount();
         if (address(debtTokens[debtToken]) == address(0)) revert Errors.InvalidDebtToken();
 
