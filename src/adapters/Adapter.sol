@@ -3,28 +3,29 @@ pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/ITokenAdapter.sol";
 import "../interfaces/IERC20Minimal.sol";
-import "../interfaces/IERC20Mintable.sol";
-import "../interfaces/IERC20Burnable.sol";
 import "../tokens/MintableBurnableERC20.sol";
 import "../base/FixedPointMath.sol";
-import "../base/Errors.sol";
+import "../base/SafeERC20Lib.sol";
 
 /// @notice Yield adapter for Autonomy V1
-/// @dev Simulates yield accrual through a configurable APY
+/// @dev Simulates yield accrual through a configurable APY.
+///      NOTE: Uses a linear APY approximation for the hackathon MVP.
 contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
-    using SafeERC20 for IERC20;
     using FixedPointMath for uint256;
+    using SafeERC20Lib for IERC20Minimal;
 
     IERC20Minimal public immutable underlyingToken;
     MintableBurnableERC20 public immutable _yieldToken;
 
     uint256 public exchangeRate; // Stored as WAD (1e18 = 1:1)
     uint256 public lastUpdateTime;
-    uint256 public apy; // Annual percentage yield in WAD (e.g., 1e17 = 10%)
+
+    /// @notice APY expressed in WAD (1e18 = 100%)
+    uint256 public apy;
+
+    uint256 private constant SECONDS_PER_YEAR = 365 days;
 
     event ExchangeRateUpdated(uint256 oldRate, uint256 newRate);
     event APYUpdated(uint256 oldAPY, uint256 newAPY);
@@ -40,89 +41,98 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
     ) Ownable(initialOwner) {
         underlyingToken = underlyingToken_;
         _yieldToken = new MintableBurnableERC20(yieldTokenName, yieldTokenSymbol, 18);
-        // Set this adapter as the minter for the yield token
         _yieldToken.setMinter(address(this));
+
         exchangeRate = initialExchangeRate;
         apy = apy_;
         lastUpdateTime = block.timestamp;
     }
 
-    /// @notice Get the yield token (implements ITokenAdapter interface)
+    /// @notice Yield token ERC20
     function yieldToken() external view override returns (IERC20Minimal) {
         return IERC20Minimal(address(_yieldToken));
     }
 
-
-    /// @notice Get current exchange rate (yield token / underlying token)
     function getExchangeRate() external view override returns (uint256) {
         return _getCurrentExchangeRate();
     }
 
-    /// @notice Deposit underlying tokens and receive yield tokens
-    function deposit(uint256 amount, address recipient) external override nonReentrant returns (uint256) {
+    /// @notice Deposit underlying & mint yield shares to recipient
+    function deposit(uint256 amount, address recipient)
+        external
+        override
+        nonReentrant
+        returns (uint256)
+    {
         _updateExchangeRate();
-        IERC20(address(underlyingToken)).safeTransferFrom(msg.sender, address(this), amount);
-        
+
+        // Pull underlying from caller (uses local SafeERC20Lib)
+        underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
+
         uint256 shares = amount.wdiv(exchangeRate);
         _yieldToken.mint(recipient, shares);
-        
+
         return shares;
     }
 
-    /// @notice Withdraw underlying tokens by burning yield tokens
-    function withdraw(uint256 shares, address recipient) external override nonReentrant returns (uint256) {
+    /// ------------------------------------------------------------------------
+    /// Custodial-flow semantics for Autonomy integration
+    ///
+    /// Autonomy holds the yield tokens, so `msg.sender` must be the one whose
+    /// yield tokens are burned. Recipient only receives the underlying.
+    /// ------------------------------------------------------------------------
+    function withdraw(uint256 shares, address recipient)
+        external
+        override
+        nonReentrant
+        returns (uint256)
+    {
         _updateExchangeRate();
-        
-        // Burn yield tokens from caller (Autonomy contract)
+
+        // Burn yield tokens from caller (Autonomy/core)
         _yieldToken.burnFrom(msg.sender, shares);
-        
-        // Calculate amount based on current exchange rate
+
         uint256 amount = shares.wmul(exchangeRate);
-        IERC20(address(underlyingToken)).safeTransfer(recipient, amount);
-        
+        // Use local SafeERC20Lib for safe transfer
+        underlyingToken.safeTransfer(recipient, amount);
+
         return amount;
     }
 
-    /// @notice Accrue yield (update exchange rate)
-    /// @dev Called before state-changing operations to prevent stale index manipulation
     function accrue() external override {
         _updateExchangeRate();
     }
 
-    /// @notice Harvest yield (simulated - just updates exchange rate)
     function harvest() external override returns (uint256) {
         uint256 oldRate = exchangeRate;
         _updateExchangeRate();
-        uint256 yield = (exchangeRate > oldRate) ? exchangeRate - oldRate : 0;
+        uint256 yield = exchangeRate > oldRate ? exchangeRate - oldRate : 0;
         emit YieldAccrued(yield);
         return yield;
     }
 
-    /// @notice Get total value locked in underlying terms
     function totalValue() external view override returns (uint256) {
         uint256 totalShares = _yieldToken.totalSupply();
         return totalShares.wmul(_getCurrentExchangeRate());
     }
 
-    /// @notice Set the APY (owner only)
     function setAPY(uint256 apy_) external onlyOwner {
         _updateExchangeRate();
-        uint256 oldAPY = apy;
+        uint256 old = apy;
         apy = apy_;
-        emit APYUpdated(oldAPY, apy_);
+        emit APYUpdated(old, apy_);
     }
 
-    /// @notice Emergency withdraw (owner-only)
     function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner {
-        IERC20(token).safeTransfer(to, amount);
+        // Use local SafeERC20Lib with IERC20Minimal cast
+        IERC20Minimal(token).safeTransfer(to, amount);
     }
 
-    /// @notice Poke yield - manually trigger yield accrual
     function pokeYield() external {
         _updateExchangeRate();
     }
 
-    // Internal functions
+    // ------------------------------------------------------------------------
 
     function _getCurrentExchangeRate() internal view returns (uint256) {
         if (_yieldToken.totalSupply() == 0) {
@@ -130,21 +140,21 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
         }
 
         uint256 timeElapsed = block.timestamp - lastUpdateTime;
-        if (timeElapsed == 0) {
-            return exchangeRate;
-        }
+        if (timeElapsed == 0) return exchangeRate;
 
-        // Calculate yield: rate = rate * (1 + apy)^(timeElapsed / 1 year)
-        // Using compound interest formula
-        uint256 periodsPerYear = 365 days;
-        uint256 ratePerPeriod = FixedPointMath.WAD + (apy * timeElapsed) / periodsPerYear;
-        
-        return exchangeRate.wmul(ratePerPeriod);
+        uint256 rateMultiplier =
+            FixedPointMath.WAD + (apy * timeElapsed) / SECONDS_PER_YEAR;
+
+        return exchangeRate.wmul(rateMultiplier);
     }
 
     function _updateExchangeRate() internal {
-        exchangeRate = _getCurrentExchangeRate();
+        uint256 oldRate = exchangeRate;
+        uint256 newRate = _getCurrentExchangeRate();
+        if (newRate != oldRate) {
+            exchangeRate = newRate;
+            emit ExchangeRateUpdated(oldRate, newRate);
+        }
         lastUpdateTime = block.timestamp;
     }
 }
-

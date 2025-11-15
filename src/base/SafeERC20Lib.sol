@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import "../interfaces/IERC20Minimal.sol";
 import "./Errors.sol";
 
-/// @notice Safe ERC20 operations
-library SafeERC20 {
+/// @notice Safe ERC20 operations (custom minimal version)
+/// @dev Renamed to SafeERC20Lib to avoid collision with OZ SafeERC20
+library SafeERC20Lib {
     function safeTransfer(IERC20Minimal token, address to, uint256 amount) internal {
         (bool success, bytes memory data) = address(token).call(
             abi.encodeWithSelector(IERC20Minimal.transfer.selector, to, amount)
@@ -33,4 +34,3 @@ library SafeERC20 {
         }
     }
 }
-

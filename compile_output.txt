@@ -1,0 +1,1047 @@
+No files changed, compilation skipped
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/base/FixedPointMath.sol:4:8
+  |
+4 | import "./Errors.sol";
+  |        ^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/IERC20Mintable.sol:4:8
+  |
+4 | import "./IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableERC20.sol:4:8
+  |
+4 | import "./ERC20.sol";
+  |        ^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableERC20.sol:5:8
+  |
+5 | import "../interfaces/IERC20Mintable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableERC20.sol:6:8
+  |
+6 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:5:8
+  |
+5 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/IAutonomyV1.sol:4:8
+  |
+4 | import "./IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/IAutonomyV1.sol:5:8
+  |
+5 | import "./ITokenAdapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/base/SafeERC20Lib.sol:4:8
+  |
+4 | import "../interfaces/IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/base/SafeERC20Lib.sol:5:8
+  |
+5 | import "./Errors.sol";
+  |        ^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/IERC20Burnable.sol:4:8
+  |
+4 | import "./IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:5:8
+  |
+5 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/ERC20.sol:4:8
+  |
+4 | import "../interfaces/IERC20Metadata.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/ERC20.sol:5:8
+  |
+5 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:6:8
+  |
+6 | import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableBurnableERC20.sol:4:8
+  |
+4 | import "./ERC20.sol";
+  |        ^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+  --> src/tokens/MintableERC20.sol:18:14
+   |
+18 |     modifier onlyMinter() {
+   |              ^^^^^^^^^^
+   |
+   = note: wrap modifier logic to reduce code size
+           
+           - modifier onlyMinter() {
+           -     if (msg.sender != minter) revert Errors.Unauthorized();
+           -     _;
+           - }
+           + modifier onlyMinter() {
+           +     _onlyMinter();
+           +     _;
+           + }
+           + 
+           + function _onlyMinter() internal {
+           +     if (msg.sender != minter) revert Errors.Unauthorized();
+           + }
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/ITokenAdapter.sol:4:8
+  |
+4 | import "./IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/interfaces/IERC20Metadata.sol:4:8
+  |
+4 | import "./IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/AtAsset.sol:4:8
+  |
+4 | import "./ERC20.sol";
+  |        ^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:6:8
+  |
+6 | import "../interfaces/IAutonomyV1.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:7:8
+  |
+7 | import "../interfaces/ITokenAdapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:4:8
+  |
+4 | import "forge-std/Test.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableBurnableERC20.sol:5:8
+  |
+5 | import "../interfaces/IERC20Mintable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableBurnableERC20.sol:6:8
+  |
+6 | import "../interfaces/IERC20Burnable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:8:8
+  |
+8 | import "../interfaces/IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:5:8
+  |
+5 | import "../src/core/AutonomyV1.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/CollateralToken.sol:4:8
+  |
+4 | import "./MintableERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:7:8
+  |
+7 | import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/MintableBurnableERC20.sol:7:8
+  |
+7 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/core/AutonomyV1.sol:9:8
+  |
+9 | import "../interfaces/IERC20Mintable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:10:8
+   |
+10 | import "../interfaces/IERC20Burnable.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:11:8
+   |
+11 | import "../interfaces/IPriceOracle.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:12:8
+   |
+12 | import "../tokens/MintableERC20.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/BurnableERC20.sol:4:8
+  |
+4 | import "./ERC20.sol";
+  |        ^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/AtAsset.sol:5:8
+  |
+5 | import "../interfaces/IERC20Mintable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/mocks/MockOracle.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/mocks/MockOracle.sol:5:8
+  |
+5 | import "../interfaces/IPriceOracle.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:5:8
+  |
+5 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+  --> src/tokens/MintableBurnableERC20.sol:19:14
+   |
+19 |     modifier onlyMinter() {
+   |              ^^^^^^^^^^
+   |
+   = note: wrap modifier logic to reduce code size
+           
+           - modifier onlyMinter() {
+           -     if (msg.sender != minter) revert Errors.Unauthorized();
+           -     _;
+           - }
+           + modifier onlyMinter() {
+           +     _onlyMinter();
+           +     _;
+           + }
+           + 
+           + function _onlyMinter() internal {
+           +     if (msg.sender != minter) revert Errors.Unauthorized();
+           + }
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:6:8
+  |
+6 | import "../src/adapters/Adapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:13:8
+   |
+13 | import "../base/FixedPointMath.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/mocks/MockComet.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/AtAsset.sol:6:8
+  |
+6 | import "../interfaces/IERC20Burnable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/AtAsset.sol:7:8
+  |
+7 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:14:8
+   |
+14 | import "../base/SafeCast.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:6:8
+  |
+6 | import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:7:8
+  |
+7 | import "../src/tokens/CollateralToken.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/BurnableERC20.sol:5:8
+  |
+5 | import "../interfaces/IERC20Burnable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/tokens/BurnableERC20.sol:6:8
+  |
+6 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:7:8
+  |
+7 | import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:8:8
+  |
+8 | import "../interfaces/ITokenAdapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:15:8
+   |
+15 | import "../base/Errors.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/mocks/MockComet.sol:5:8
+  |
+5 | import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:8:8
+  |
+8 | import "../interfaces/ITokenAdapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/Adapter.sol:9:8
+  |
+9 | import "../interfaces/IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/core/AutonomyV1.sol:16:8
+   |
+16 | import "../base/SafeERC20Lib.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/oracles/RWAOracle.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:8:8
+  |
+8 | import "../src/tokens/AtAsset.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> test/AutonomyV1.t.sol:9:8
+  |
+9 | import "../src/tokens/MintableBurnableERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:5:8
+  |
+5 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/oracles/RWAOracle.sol:5:8
+  |
+5 | import "../base/Errors.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/CometAdapter.sol:9:8
+  |
+9 | import "../interfaces/IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+  --> src/core/AutonomyV1.sol:84:14
+   |
+84 |     modifier whenNotPausedFunction(bytes4 selector) {
+   |              ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: wrap modifier logic to reduce code size
+           
+           - modifier whenNotPausedFunction(bytes4 selector) {
+           -     if (pausedFunctions[selector]) revert Errors.Paused();
+           -     _;
+           - }
+           + modifier whenNotPausedFunction(bytes4 selector) {
+           +     _whenNotPausedFunction(selector);
+           +     _;
+           + }
+           + 
+           + function _whenNotPausedFunction(bytes4 selector) internal {
+           +     if (pausedFunctions[selector]) revert Errors.Paused();
+           + }
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+  --> src/tokens/AtAsset.sol:24:14
+   |
+24 |     modifier onlyMinter() {
+   |              ^^^^^^^^^^
+   |
+   = note: wrap modifier logic to reduce code size
+           
+           - modifier onlyMinter() {
+           -     if (msg.sender != minter) revert Errors.Unauthorized();
+           -     _;
+           - }
+           + modifier onlyMinter() {
+           +     _onlyMinter();
+           +     _;
+           + }
+           + 
+           + function _onlyMinter() internal {
+           +     if (msg.sender != minter) revert Errors.Unauthorized();
+           + }
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:10:8
+   |
+10 | import "../src/interfaces/IERC20Minimal.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:11:8
+   |
+11 | import "../src/interfaces/ITokenAdapter.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:12:8
+   |
+12 | import "../src/interfaces/IPriceOracle.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/mocks/MockComet.sol:10:29
+   |
+10 |     IERC20 public immutable asset;
+   |                             ^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/mocks/MockComet.sol:13:20
+   |
+13 |     uint256 public supplyAPY; // Annual yield in WAD (e.g., 0.04e18 = 4%)
+   |                    ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/Adapter.sol:10:8
+   |
+10 | import "../tokens/MintableBurnableERC20.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/Adapter.sol:11:8
+   |
+11 | import "../base/FixedPointMath.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/oracles/RWAOracle.sol:19:17
+   |
+19 |         uint256 initialNAV,
+   |                 ^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+note[mixed-case-function]: function names should use mixedCase
+  --> src/oracles/RWAOracle.sol:31:14
+   |
+31 |     function updateNAV(uint256 nav, uint64 _validUntil) external onlyOwner {
+   |              ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+  --> src/core/AutonomyV1.sol:89:14
+   |
+89 |     modifier onlyWhitelisted() {
+   |              ^^^^^^^^^^^^^^^
+   |
+   = note: wrap modifier logic to reduce code size
+           
+           - modifier onlyWhitelisted() {
+           -     if (whitelist != address(0)) {
+           -         // Check whitelist contract via staticcall
+           -         (bool success, bytes memory data) = whitelist.staticcall(
+           -             abi.encodeWithSignature("isWhitelisted(address)", msg.sender)
+           -         );
+           -         if (!success || data.length == 0) revert Errors.NotWhitelisted();
+           -         bool isWhitelisted = abi.decode(data, (bool));
+           -         if (!isWhitelisted) revert Errors.NotWhitelisted();
+           -     }
+           -     _;
+           - }
+           + modifier onlyWhitelisted() {
+           +     _onlyWhitelisted();
+           +     _;
+           + }
+           + 
+           + function _onlyWhitelisted() internal {
+           +     if (whitelist != address(0)) {
+           +         // Check whitelist contract via staticcall
+           +         (bool success, bytes memory data) = whitelist.staticcall(
+           +             abi.encodeWithSignature("isWhitelisted(address)", msg.sender)
+           +         );
+           +         if (!success || data.length == 0) revert Errors.NotWhitelisted();
+           +         bool isWhitelisted = abi.decode(data, (bool));
+           +         if (!isWhitelisted) revert Errors.NotWhitelisted();
+           +     }
+           + }
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:13:8
+   |
+13 | import "../src/mocks/MockOracle.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/base/SafeCast.sol:4:8
+  |
+4 | import "./Errors.sol";
+  |        ^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/mocks/MockComet.sol:23:17
+   |
+23 |         uint256 initialAPY_
+   |                 ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+note[mixed-case-function]: function names should use mixedCase
+  --> src/oracles/RWAOracle.sol:56:14
+   |
+56 |     function getNAV() external view returns (uint256) {
+   |              ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/Adapter.sol:20:36
+   |
+20 |     IERC20Minimal public immutable underlyingToken;
+   |                                    ^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:14:8
+   |
+14 | import "../src/base/Errors.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> test/AutonomyV1.t.sol:15:8
+   |
+15 | import "../src/utils/Whitelist.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:6:8
+  |
+6 | import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/Adapter.sol:21:44
+   |
+21 |     MintableBurnableERC20 public immutable _yieldToken;
+   |                                            ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/adapters/Adapter.sol:32:30
+   |
+32 |     event APYUpdated(uint256 oldAPY, uint256 newAPY);
+   |                              ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:7:8
+  |
+7 | import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/CometAdapter.sol:10:8
+   |
+10 | import "../base/FixedPointMath.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> src/base/SafeCast.sol:10:16
+   |
+10 |         return uint128(x);
+   |                ^^^^^^^^^^
+   |
+   = note: Consider disabling this lint if you're certain the cast is safe:
+           
+           // casting to 'uint128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/utils/Whitelist.sol:4:8
+  |
+4 | import "@openzeppelin/contracts/access/Ownable.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/CometAdapter.sol:11:8
+   |
+11 | import "../base/Errors.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[mixed-case-function]: function names should use mixedCase
+  --> src/mocks/MockComet.sol:86:14
+   |
+86 |     function setAPY(uint256 newAPY) external {
+   |              ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/mocks/MockComet.sol:86:29
+   |
+86 |     function setAPY(uint256 newAPY) external {
+   |                             ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> src/base/SafeCast.sol:15:16
+   |
+15 |         return uint64(x);
+   |                ^^^^^^^^^
+   |
+   = note: Consider disabling this lint if you're certain the cast is safe:
+           
+           // casting to 'uint64' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> src/base/SafeCast.sol:20:16
+   |
+20 |         return uint32(x);
+   |                ^^^^^^^^^
+   |
+   = note: Consider disabling this lint if you're certain the cast is safe:
+           
+           // casting to 'uint32' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[erc20-unchecked-transfer]: ERC20 'transfer' and 'transferFrom' calls should check the return value
+  --> src/mocks/MockComet.sol:39:9
+   |
+39 |         asset.transferFrom(msg.sender, address(this), amount);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#erc20-unchecked-transfer
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:8:8
+  |
+8 | import "../interfaces/ITokenAdapter.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+ --> src/adapters/RWAAdapter.sol:9:8
+  |
+9 | import "../interfaces/IERC20Minimal.sol";
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/CometAdapter.sol:24:36
+   |
+24 |     IERC20Minimal public immutable underlyingToken;
+   |                                    ^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> src/base/SafeCast.sol:25:16
+   |
+25 |         return int256(x);
+   |                ^^^^^^^^^
+   |
+   = note: Consider disabling this lint if you're certain the cast is safe:
+           
+           // casting to 'int256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/RWAAdapter.sol:10:8
+   |
+10 | import "../oracles/RWAOracle.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[mixed-case-variable]: mutable variables should use mixedCase
+  --> src/adapters/Adapter.sol:32:46
+   |
+32 |     event APYUpdated(uint256 oldAPY, uint256 newAPY);
+   |                                              ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-variable
+
+warning[erc20-unchecked-transfer]: ERC20 'transfer' and 'transferFrom' calls should check the return value
+  --> src/mocks/MockComet.sol:60:9
+   |
+60 |         asset.transfer(msg.sender, amount);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#erc20-unchecked-transfer
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> src/base/SafeCast.sol:30:16
+   |
+30 |         return int128(x);
+   |                ^^^^^^^^^
+   |
+   = note: Consider disabling this lint if you're certain the cast is safe:
+           
+           // casting to 'int128' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/CometAdapter.sol:25:29
+   |
+25 |     IComet public immutable comet;
+   |                             ^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[mixed-case-function]: function names should use mixedCase
+   --> src/adapters/Adapter.sol:118:14
+    |
+118 |     function setAPY(uint256 apy_) external onlyOwner {
+    |              ^^^^^^
+    |
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#mixed-case-function
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/RWAAdapter.sol:11:8
+   |
+11 | import "../tokens/MintableBurnableERC20.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/RWAAdapter.sol:12:8
+   |
+12 | import "../base/FixedPointMath.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[unaliased-plain-import]: use named imports '{A, B}' or alias 'import ".." as X'
+  --> src/adapters/RWAAdapter.sol:13:8
+   |
+13 | import "../base/Errors.sol";
+   |        ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unaliased-plain-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/RWAAdapter.sol:24:36
+   |
+24 |     IERC20Minimal public immutable underlyingToken;
+   |                                    ^^^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/RWAAdapter.sol:25:44
+   |
+25 |     MintableBurnableERC20 public immutable _yieldToken;
+   |                                            ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/adapters/RWAAdapter.sol:26:32
+   |
+26 |     RWAOracle public immutable rwaOracle;
+   |                                ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+

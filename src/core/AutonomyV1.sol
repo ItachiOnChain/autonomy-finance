@@ -3,8 +3,6 @@ pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IAutonomyV1.sol";
 import "../interfaces/ITokenAdapter.sol";
 import "../interfaces/IERC20Minimal.sol";
@@ -15,22 +13,21 @@ import "../tokens/MintableERC20.sol";
 import "../base/FixedPointMath.sol";
 import "../base/SafeCast.sol";
 import "../base/Errors.sol";
+import "../base/SafeERC20Lib.sol";
 
 /// @notice Autonomy V1 - Self-repaying lending and borrowing protocol for Mantle
 /// @dev Core protocol contract managing deposits, debt, and self-repaying loans
 contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
-    using SafeERC20 for IERC20;
+    using SafeERC20Lib for IERC20Minimal;
     using FixedPointMath for uint256;
     using SafeCast for uint256;
 
     // ============ Constants ============
-
     uint256 public constant MAX_LIQUIDATION_BONUS = 0.1e18; // 10% max liquidation bonus
     uint256 public constant MINIMUM_COLLATERALIZATION_RATIO = 1.5e18; // 150% minimum
     uint256 public constant LIQUIDATION_THRESHOLD = 1.2e18; // 120% liquidation threshold
 
     // ============ Storage ============
-
     /// @notice Price oracle for token pricing
     IPriceOracle public oracle;
 
@@ -75,7 +72,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     mapping(bytes4 => bool) public pausedFunctions;
 
     // ============ Events ============
-
     event OracleUpdated(address indexed oldOracle, address indexed newOracle);
     event WhitelistUpdated(address indexed oldWhitelist, address indexed newWhitelist);
     event YieldTokenRegistered(address indexed yieldToken, address indexed adapter);
@@ -85,7 +81,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     event AutoRepay(address indexed yieldToken, uint256 amountBurned);
 
     // ============ Modifiers ============
-
     modifier whenNotPausedFunction(bytes4 selector) {
         if (pausedFunctions[selector]) revert Errors.Paused();
         _;
@@ -93,7 +88,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
     modifier onlyWhitelisted() {
         if (whitelist != address(0)) {
-            // Check whitelist
+            // Check whitelist contract via staticcall
             (bool success, bytes memory data) = whitelist.staticcall(
                 abi.encodeWithSignature("isWhitelisted(address)", msg.sender)
             );
@@ -105,13 +100,11 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ Constructor ============
-
     constructor(address initialOwner, IPriceOracle oracle_) Ownable(initialOwner) {
         oracle = oracle_;
     }
 
     // ============ Admin Functions ============
-
     function setOracle(IPriceOracle oracle_) external onlyOwner {
         address oldOracle = address(oracle);
         oracle = oracle_;
@@ -124,6 +117,8 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         emit WhitelistUpdated(oldWhitelist, whitelist_);
     }
 
+    /// @notice Register a yield token with its adapter
+    /// @dev Uses IERC20Minimal + SafeERC20Lib for approvals
     function registerYieldToken(address yieldToken, ITokenAdapter adapter) external onlyOwner {
         if (address(adapter) == address(0)) revert Errors.InvalidAdapter();
         if (adapter.yieldToken() != IERC20Minimal(yieldToken)) revert Errors.InvalidYieldToken();
@@ -133,14 +128,16 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         isYieldTokenRegistered[yieldToken] = true;
         registeredYieldTokens.push(yieldToken);
         
-        // Approve adapter to burn yield tokens (for withdrawals)
-        IERC20 yieldTokenERC20 = IERC20(yieldToken);
-        yieldTokenERC20.forceApprove(address(adapter), type(uint256).max);
+        // Approve adapter to burn/transfer yield tokens (for withdrawals)
+        IERC20Minimal yieldTokenMinimal = IERC20Minimal(yieldToken);
+        // Reset then set max to be safe for non-standard tokens
+        yieldTokenMinimal.safeApprove(address(adapter), 0);
+        yieldTokenMinimal.safeApprove(address(adapter), type(uint256).max);
         
         // Approve adapter to transfer underlying tokens from this contract
         IERC20Minimal underlying = adapter.underlyingToken();
-        IERC20 underlyingERC20 = IERC20(address(underlying));
-        underlyingERC20.forceApprove(address(adapter), type(uint256).max);
+        underlying.safeApprove(address(adapter), 0);
+        underlying.safeApprove(address(adapter), type(uint256).max);
         
         emit YieldTokenRegistered(yieldToken, address(adapter));
     }
@@ -167,7 +164,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ View Functions ============
-
     function getTotalDeposited(address yieldToken) external view override returns (uint256) {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
@@ -247,7 +243,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ User Functions ============
-
     function deposit(
         address yieldToken,
         uint256 amount,
@@ -261,7 +256,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         _accrue(yieldToken);
 
         IERC20Minimal underlying = adapter.underlyingToken();
-        IERC20(address(underlying)).safeTransferFrom(msg.sender, address(this), amount);
+        underlying.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 shares = adapter.deposit(amount, address(this));
         
@@ -435,7 +430,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ Keeper Functions ============
-
     function harvest(address yieldToken) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("harvest(address)")))) returns (uint256) {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
@@ -454,7 +448,6 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ Internal Functions ============
-
     /// @notice Accrue yield for a yield token
     /// @dev Called before state-changing operations to prevent stale index manipulation
     function _accrue(address yieldToken) internal {
