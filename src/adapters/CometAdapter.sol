@@ -22,22 +22,34 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     using FixedPointMath for uint256;
     using SafeERC20Lib for IERC20Minimal;
 
+    /// @notice Underlying asset (e.g., MNT/wMNT/USDC)
     IERC20Minimal public immutable underlyingToken;
+
+    /// @notice Comet-like yield token contract
     IComet public immutable comet;
 
+    /// @notice Last time accrue() or harvest() was called (bookkeeping only)
     uint256 public lastAccrueTime;
+
+    /// @notice Last recorded totalSupply of the Comet token
+    /// @dev Used to compute per-share yield for harvest()
     uint256 public lastTotalSupply;
 
+    /// @notice Emitted when yield is harvested
+    /// @dev `yield` is a WAD per-share yield factor:
+    ///      e.g. 0.01e18 means "1% yield per share since last harvest"
     event YieldHarvested(uint256 yield);
 
-    /// @param initialOwner owner of this adapter (for emergencyWithdraw / admin)
-    /// @param underlyingToken_ underlying ERC20 token address (e.g., USDC)
-    /// @param comet_ comet protocol token/contract address
-    constructor(address initialOwner, IERC20Minimal underlyingToken_, address comet_) Ownable(initialOwner) {
+    /// @param initialOwner      owner of this adapter (for emergencyWithdraw / admin)
+    /// @param underlyingToken_  underlying ERC20 token address (e.g., USDC)
+    /// @param comet_            comet protocol token/contract address
+    constructor(address initialOwner, IERC20Minimal underlyingToken_, address comet_)
+        Ownable(initialOwner)
+    {
         underlyingToken = underlyingToken_;
         comet = IComet(comet_);
         lastAccrueTime = block.timestamp;
-        // safe to call totalSupply on comet at construction (tests expect this)
+        // Safe to call totalSupply on comet at construction (tests expect this)
         lastTotalSupply = comet.totalSupply();
     }
 
@@ -47,7 +59,8 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     }
 
     /// @notice Exchange rate not modeled here (1:1 canonical for this adapter)
-    function getExchangeRate() external view override returns (uint256) {
+    /// @dev AutonomyV1 uses this as a baseline; actual yield is reflected via harvest()
+    function getExchangeRate() external pure override returns (uint256) {
         return 1e18;
     }
 
@@ -60,7 +73,12 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     /// @dev Computes minted shares as postBalance - preBalance to avoid sending previously-held shares.
     ///      Works for both direct-user flows (caller supplies approval) and core-mediated flows
     ///      (Autonomy contract transfers underlying to itself and has approved this adapter).
-    function deposit(uint256 amount, address recipient) external override nonReentrant returns (uint256) {
+    function deposit(uint256 amount, address recipient)
+        external
+        override
+        nonReentrant
+        returns (uint256)
+    {
         if (amount == 0) revert Errors.InvalidAmount();
 
         // Pull underlying from caller (could be Autonomy or user)
@@ -91,24 +109,29 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     /// @notice Withdraw underlying by pulling comet shares from the caller (Autonomy/core),
     ///         calling comet.withdraw, and forwarding the resulting underlying delta to `recipient`.
     /// @dev For Autonomy custodial flow, Autonomy will be msg.sender and must have the comet shares.
-    function withdraw(uint256 shares, address recipient) external override nonReentrant returns (uint256) {
+    function withdraw(uint256 shares, address recipient)
+        external
+        override
+        nonReentrant
+        returns (uint256)
+    {
         if (shares == 0) revert Errors.InvalidAmount();
 
         // Pull comet shares from the caller (msg.sender should be Autonomy/core)
         IERC20Minimal(address(comet)).safeTransferFrom(msg.sender, address(this), shares);
 
         // Record prior underlying balance to compute exact amount returned by comet.withdraw
-        uint256 preUnderlyingBalance = IERC20Minimal(address(underlyingToken)).balanceOf(address(this));
+        uint256 preUnderlyingBalance = underlyingToken.balanceOf(address(this));
 
         // Request withdraw from comet (comet will transfer underlying to this adapter)
         comet.withdraw(address(underlyingToken), shares);
 
-        uint256 postUnderlyingBalance = IERC20Minimal(address(underlyingToken)).balanceOf(address(this));
+        uint256 postUnderlyingBalance = underlyingToken.balanceOf(address(this));
         uint256 amountReceived = 0;
         if (postUnderlyingBalance > preUnderlyingBalance) {
             amountReceived = postUnderlyingBalance - preUnderlyingBalance;
             // Forward the underlying to the recipient
-            IERC20Minimal(address(underlyingToken)).safeTransfer(recipient, amountReceived);
+            underlyingToken.safeTransfer(recipient, amountReceived);
         }
 
         // Update bookkeeping
@@ -118,27 +141,43 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         return amountReceived;
     }
 
-    /// @notice Harvest yield by checking increase in total supply (comet.totalSupply).
-    /// @dev Emits YieldHarvested when positive.
+    /// @notice Harvest yield by checking the increase in totalSupply (comet.totalSupply)
+    ///         and converting it into a per-share WAD yield factor for AutonomyV1.
+    ///
+    /// @dev AutonomyV1._applyYield expects:
+    ///      - `yield` to be a WAD "per-share" yield factor
+    ///      - then does: yieldValue = totalShares.wmul(yield).wmul(price)
+    ///
+    ///      Here we compute:
+    ///          delta = currentSupply - lastTotalSupply         (absolute increase in shares)
+    ///          yieldWad = delta / lastTotalSupply (WAD)        (relative per-share yield)
+    ///
+    ///      So if supply grew by 5% since last time, yieldWad ~= 0.05e18.
     function harvest() external override nonReentrant returns (uint256) {
         uint256 currentSupply = comet.totalSupply();
-        uint256 yieldEarned = 0;
+        uint256 yieldWad = 0;
 
-        if (currentSupply > lastTotalSupply) {
-            yieldEarned = currentSupply - lastTotalSupply;
+        if (currentSupply > lastTotalSupply && lastTotalSupply > 0) {
+            uint256 delta = currentSupply - lastTotalSupply;
+            // per-share yield factor in WAD: delta / lastTotalSupply
+            yieldWad = delta.wdiv(lastTotalSupply);
         }
 
         lastTotalSupply = currentSupply;
         lastAccrueTime = block.timestamp;
 
-        if (yieldEarned > 0) {
-            emit YieldHarvested(yieldEarned);
+        if (yieldWad > 0) {
+            emit YieldHarvested(yieldWad);
         }
 
-        return yieldEarned;
+        // IMPORTANT: this return value is now a WAD factor,
+        // not a raw token amount, and is compatible with AutonomyV1._applyYield.
+        return yieldWad;
     }
 
     /// @notice Total value (in underlying-equivalent) exposed by this adapter
+    /// @dev For this simplified adapter, we treat comet.totalSupply() as tracking
+    ///      aggregate yield-token value in "1:1" units for MVP purposes.
     function totalValue() external view override returns (uint256) {
         return comet.totalSupply();
     }

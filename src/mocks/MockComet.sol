@@ -6,46 +6,50 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @notice Mock Comet contract for local testing
-/// @dev Simulates Compound Comet (cmETH) with yield accrual
+/// @dev Simulates a Comet-like contract where yield accrues by increasing totalSupply
+///     (so adapters that compute yield from totalSupply deltas will detect it).
 contract MockComet is ERC20 {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable asset;
-    uint256 public exchangeRate; // WAD format (1e18 = 1:1)
+    uint256 public exchangeRate; // WAD format (1e18 = 1:1) used for supply/withdraw arithmetic
     uint256 public lastAccrueTime;
     uint256 public supplyAPY; // Annual yield in WAD (e.g., 0.04e18 = 4%)
 
-    event Supplied(address indexed account, uint256 amount);
-    event Withdrawn(address indexed account, uint256 amount);
-    event YieldAccrued(uint256 newRate);
+    event Supplied(address indexed account, uint256 amount, uint256 sharesMinted);
+    event Withdrawn(address indexed account, uint256 amount, uint256 sharesBurned);
+    event YieldAccrued(uint256 deltaShares, uint256 newTotalSupply);
 
     constructor(address asset_, string memory name_, string memory symbol_, uint256 initialAPY_) ERC20(name_, symbol_) {
         require(asset_ != address(0), "MockComet: zero asset");
         asset = IERC20(asset_);
-        exchangeRate = 1e18; // Start at 1:1
+        exchangeRate = 1e18; // Start at 1:1 for simplicity
         lastAccrueTime = block.timestamp;
         supplyAPY = initialAPY_;
     }
 
     /// @notice Supply assets and mint cmETH shares
+    /// @dev shares = amount / exchangeRate (WAD math)
     function supply(address asset_, uint256 amount) external {
         require(asset_ == address(asset), "MockComet: wrong asset");
         require(amount > 0, "MockComet: zero amount");
 
-        // Accrue interest before supply
+        // Accrue interest before supply (this may mint delta shares to totalSupply)
         _accrue();
 
-        // Transfer assets from user using safe call
+        // Pull underlying from caller
         asset.safeTransferFrom(msg.sender, address(this), amount);
 
         // Mint shares at current exchange rate (shares = amount / exchangeRate)
+        // share = (amount * 1e18) / exchangeRate
         uint256 shares = (amount * 1e18) / exchangeRate;
         _mint(msg.sender, shares);
 
-        emit Supplied(msg.sender, amount);
+        emit Supplied(msg.sender, amount, shares);
     }
 
     /// @notice Withdraw assets by burning cmETH shares
+    /// @dev burns shares = amount / exchangeRate; sends underlying to caller
     function withdraw(address asset_, uint256 amount) external {
         require(asset_ == address(asset), "MockComet: wrong asset");
         require(amount > 0, "MockComet: zero amount");
@@ -57,29 +61,46 @@ contract MockComet is ERC20 {
         uint256 shares = (amount * 1e18) / exchangeRate;
         _burn(msg.sender, shares);
 
-        // Transfer assets to user using safe call
+        // Transfer assets to user
         asset.safeTransfer(msg.sender, amount);
 
-        emit Withdrawn(msg.sender, amount);
+        emit Withdrawn(msg.sender, amount, shares);
     }
 
-    /// @notice Accrue yield by increasing exchange rate
+    /// @notice Accrue yield by minting new shares (increases totalSupply).
+    /// @dev This simulates protocol-level yield distribution so adapters that look at
+    ///      `totalSupply()` increases will detect yield correctly.
     function _accrue() internal {
         uint256 timeElapsed = block.timestamp - lastAccrueTime;
         if (timeElapsed == 0) return;
 
-        // Calculate yield: rate * time * APY / seconds_per_year
+        // seconds per year
         uint256 secondsPerYear = 365 days;
-        // exchangeRate, supplyAPY are in WAD; ensure multiplication avoids overflow (solc 0.8)
-        uint256 yield = (exchangeRate * timeElapsed * supplyAPY) / (secondsPerYear * 1e18);
 
-        exchangeRate += yield;
+        uint256 currentTotal = totalSupply();
+
+        // If no shares exist yet, nothing to distribute
+        if (currentTotal == 0) {
+            lastAccrueTime = block.timestamp;
+            return;
+        }
+
+        // deltaShares = currentTotal * supplyAPY * timeElapsed / secondsPerYear / 1e18
+        // supplyAPY is WAD (1e18 = 100%), so divide by 1e18 to normalize.
+        uint256 deltaShares = (currentTotal * supplyAPY * timeElapsed) / (secondsPerYear * 1e18);
+
+        if (deltaShares > 0) {
+            // Mint the yield shares to the contract itself (these represent protocol-accrued yield).
+            // They don't belong to any user directly; adapters can treat totalSupply growth as yield.
+            _mint(address(this), deltaShares);
+
+            emit YieldAccrued(deltaShares, totalSupply());
+        }
+
         lastAccrueTime = block.timestamp;
-
-        emit YieldAccrued(exchangeRate);
     }
 
-    /// @notice Get current exchange rate
+    /// @notice Get current (mock) exchange rate — for convenience
     function getExchangeRate() external view returns (uint256) {
         return exchangeRate;
     }

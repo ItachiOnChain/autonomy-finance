@@ -46,15 +46,19 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     /// @notice Mapping from account to yield token to deposited shares
     mapping(address => mapping(address => uint256)) public depositedShares;
 
-    /// @notice Mapping from account to debt token to debt amount
+    /// @notice Mapping from account to debt token to debt amount (raw outstanding principal per-user)
     mapping(address => mapping(address => uint256)) public debt;
 
-    /// @notice Mapping from debt token to total debt
+    /// @notice Mapping from debt token to total debt (protocol-level outstanding principal)
     mapping(address => uint256) public totalDebt;
 
-    /// @notice Mapping from debt token to cumulative debt reduction (for auto-repay)
-    /// @dev Used to track proportional debt reduction across all users
+    /// @notice Mapping from debt token to cumulative debt reduction factor (WAD)
+    /// @dev Increased by _applyYield when yield is used to burn debt. Represents cumulative proportional reduction
+    ///      factor that should be applied to each user's debt (proportionally) over time.
     mapping(address => uint256) public debtReductionFactor;
+
+    /// @notice Per-user checkpoint of applied reduction (debtReductionFactor) to avoid double-applying
+    mapping(address => mapping(address => uint256)) public debtReductionClaimed;
 
     /// @notice Array of registered yield tokens
     address[] public registeredYieldTokens;
@@ -163,6 +167,8 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ View Functions ============
+
+    /// @notice Return the total underlying value for a given yield token (shares * exchangeRate)
     function getTotalDeposited(address yieldToken) external view override returns (uint256) {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
@@ -176,10 +182,22 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         return totalDebt[debtToken];
     }
 
-    function getDebt(address account, address debtToken) external view override returns (uint256) {
-        return debt[account][debtToken];
+    /// @notice Return effective user debt (accounts for cumulative reduction factor not yet applied to user)
+    function getDebt(address account, address debtToken) public view override returns (uint256) {
+        uint256 raw = debt[account][debtToken];
+        uint256 cumulative = debtReductionFactor[debtToken];
+        uint256 claimed = debtReductionClaimed[debtToken][account];
+
+        if (raw == 0 || cumulative == 0 || cumulative <= claimed) {
+            return raw;
+        }
+
+        uint256 delta = cumulative - claimed;
+        uint256 reduction = (raw * delta) / 1e18;
+        return raw > reduction ? raw - reduction : 0;
     }
 
+    /// @notice Compute total collateral value (underlying * price) across all registered yield tokens
     function getCollateralValue(address account) public view override returns (uint256) {
         uint256 totalValue = 0;
 
@@ -204,19 +222,14 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         return totalValue;
     }
 
+    /// @notice Compute total debt value for an account (applies per-user reduction factor conceptually)
     function getDebtValue(address account) public view override returns (uint256) {
         uint256 totalDebtValue = 0;
 
         // Iterate through all registered debt tokens
         for (uint256 i = 0; i < registeredDebtTokens.length; i++) {
             address debtToken = registeredDebtTokens[i];
-            uint256 userDebt = debt[account][debtToken];
-
-            // Apply debt reduction factor if any
-            if (userDebt > 0 && debtReductionFactor[debtToken] > 0) {
-                uint256 reduction = (userDebt * debtReductionFactor[debtToken]) / 1e18;
-                userDebt = userDebt > reduction ? userDebt - reduction : 0;
-            }
+            uint256 userDebt = getDebt(account, debtToken);
 
             // Get price from oracle (debt token price in debt units)
             uint256 price = oracle.priceInDebt(debtToken);
@@ -242,6 +255,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ User Functions ============
+
     function deposit(
         address yieldToken,
         uint256 amount,
@@ -361,6 +375,8 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         emit Mint(msg.sender, debtToken, amount);
     }
 
+    /// @notice Repay debt for `recipient` by burning `amount` of debt tokens from msg.sender.
+    ///         Applies any unapplied per-user reduction (from prior auto-repay) before processing the repay.
     function repay(
         address debtToken,
         uint256 amount,
@@ -372,25 +388,37 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         whenNotPausedFunction(bytes4(keccak256(bytes("repay(address,uint256,address)"))))
     {
         if (amount == 0) revert Errors.InvalidAmount();
-        if (debt[recipient][debtToken] < amount) revert Errors.InsufficientDebt();
 
         // Accrue yield before repay
         for (uint256 i = 0; i < registeredYieldTokens.length; i++) {
             _accrue(registeredYieldTokens[i]);
         }
 
-        // Apply debt reduction if any
-        uint256 currentDebt = debt[recipient][debtToken];
-        if (currentDebt > 0 && debtReductionFactor[debtToken] > 0) {
-            uint256 reduction = (currentDebt * debtReductionFactor[debtToken]) / 1e18;
-            if (reduction > currentDebt) reduction = currentDebt;
-            debt[recipient][debtToken] = currentDebt - reduction;
-            totalDebt[debtToken] -= reduction;
-            debtReductionFactor[debtToken] = 0; // Reset after applying
+        // --- Apply per-user reduction checkpoint (if any) ---
+        uint256 currentDebtRaw = debt[recipient][debtToken];
+        if (currentDebtRaw > 0) {
+            uint256 cumulative = debtReductionFactor[debtToken];
+            uint256 claimed = debtReductionClaimed[debtToken][recipient];
+            if (cumulative > claimed) {
+                uint256 delta = cumulative - claimed;
+                uint256 reduction = (currentDebtRaw * delta) / 1e18;
+                if (reduction > currentDebtRaw) reduction = currentDebtRaw;
+                // Reduce user's raw debt (do NOT change totalDebt — totalDebt was already reduced at _applyYield time)
+                debt[recipient][debtToken] = currentDebtRaw - reduction;
+                // Mark user's checkpoint as up-to-date
+                debtReductionClaimed[debtToken][recipient] = cumulative;
+                // update variable for subsequent checks
+                currentDebtRaw = debt[recipient][debtToken];
+            }
         }
 
+        // Now check that recipient has enough debt to cover the repay
+        if (debt[recipient][debtToken] < amount) revert Errors.InsufficientDebt();
+
+        // Burn the debt tokens from msg.sender (repayer)
         IERC20Burnable(debtToken).burnFrom(msg.sender, amount);
 
+        // Decrease user debt and protocol totalDebt
         debt[recipient][debtToken] -= amount;
         totalDebt[debtToken] -= amount;
 
@@ -433,8 +461,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
         for (uint256 i = 0; i < registeredDebtTokens.length; i++) {
             address debtToken = registeredDebtTokens[i];
-            uint256 accountDebt = debt[account][debtToken];
-
+            uint256 accountDebt = getDebt(account, debtToken); // uses effective debt (view)
             if (accountDebt > 0) {
                 uint256 debtTokenPrice = oracle.priceInDebt(debtToken);
                 uint256 accountDebtValue = accountDebt.wmul(debtTokenPrice);
@@ -446,7 +473,23 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
                 // Burn debt tokens from liquidator (they need to have them)
                 IERC20Burnable(debtToken).burnFrom(msg.sender, debtShareAmount);
 
-                debt[account][debtToken] -= debtShareAmount;
+                // Reduce raw stored debt for the account and totalDebt
+                // Note: we must also update the raw debt mapping directly (these users may have unapplied reductions)
+                // To be consistent, apply the user's checkpoint before subtracting:
+                uint256 rawDebt = debt[account][debtToken];
+                uint256 cumulative = debtReductionFactor[debtToken];
+                uint256 claimed = debtReductionClaimed[debtToken][account];
+                if (rawDebt > 0 && cumulative > claimed) {
+                    uint256 delta = cumulative - claimed;
+                    uint256 reduction = (rawDebt * delta) / 1e18;
+                    if (reduction > rawDebt) reduction = rawDebt;
+                    rawDebt = rawDebt - reduction;
+                    debtReductionClaimed[debtToken][account] = cumulative;
+                }
+
+                // Now apply liquidation burn
+                if (debtShareAmount > rawDebt) debtShareAmount = rawDebt;
+                debt[account][debtToken] = rawDebt - debtShareAmount;
                 totalDebt[debtToken] -= debtShareAmount;
             }
         }
@@ -496,8 +539,11 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
     /// @notice Apply yield to reduce debt (auto-repay)
     /// @param yieldToken The yield token that generated yield
-    /// @param yield The yield amount (in exchange rate units)
-    /// @return amountBurned Amount of debt tokens burned
+    /// @param yield The yield amount (in adapter-specific units)
+    /// @return amountBurned Amount of debt tokens burned (sum across debt tokens)
+    ///
+    /// NOTE: `yield` is expected to be in the form adapters provide (for CometAdapter it's a per-share WAD factor).
+    /// `_applyYield` converts that into value in debt units and uses it to burn debt tokens proportionally across debt tokens.
     function _applyYield(address yieldToken, uint256 yield) internal returns (uint256) {
         if (totalDepositedShares[yieldToken] == 0) return 0;
 
@@ -534,12 +580,13 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
             }
 
             if (debtShareAmount > 0) {
-                // Reduce total debt
+                // Reduce protocol total debt (these tokens will be minted and burned)
                 totalDebt[debtToken] -= debtShareAmount;
 
-                // Track reduction factor for proportional user debt reduction
+                // Track cumulative reduction factor for proportional user debt reduction
                 // This allows us to reduce user debt proportionally on next interaction
                 if (debtTokenTotalDebt > 0) {
+                    // reductionFactor is a WAD value representing proportion of previous total debt removed
                     uint256 reductionFactor = (debtShareAmount * 1e18) / debtTokenTotalDebt;
                     debtReductionFactor[debtToken] += reductionFactor;
                 }
