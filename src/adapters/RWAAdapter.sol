@@ -3,23 +3,26 @@ pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/ITokenAdapter.sol";
 import "../interfaces/IERC20Minimal.sol";
 import "../oracles/RWAOracle.sol";
 import "../tokens/MintableBurnableERC20.sol";
 import "../base/FixedPointMath.sol";
 import "../base/Errors.sol";
+import "../base/SafeERC20Lib.sol";
 
 /// @notice RWA Adapter - ERC-4626-like semantics with NAV-based pricing
 /// @dev Uses RWAOracle for NAV updates instead of on-chain APY. For the hackathon MVP
 ///      NAV is expected to be updated off-chain via the RWAOracle.
 contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
-    using SafeERC20 for IERC20;
     using FixedPointMath for uint256;
+    using SafeERC20Lib for IERC20Minimal;
 
-    enum Status { Active, RedeemOnly, Blocked }
+    enum Status {
+        Active,
+        RedeemOnly,
+        Blocked
+    }
 
     IERC20Minimal public immutable underlyingToken;
     MintableBurnableERC20 public immutable _yieldToken;
@@ -55,7 +58,9 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         string memory yieldTokenName,
         string memory yieldTokenSymbol,
         RWAOracle rwaOracle_
-    ) Ownable(initialOwner) {
+    )
+        Ownable(initialOwner)
+    {
         underlyingToken = underlyingToken_;
         _yieldToken = new MintableBurnableERC20(yieldTokenName, yieldTokenSymbol, 18);
         _yieldToken.setMinter(address(this));
@@ -91,7 +96,7 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         require(status == Status.Active, "RWAAdapter: deposits blocked");
         require(!rwaOracle.isStale(), "RWAAdapter: stale NAV");
 
-        IERC20(address(underlyingToken)).safeTransferFrom(msg.sender, address(this), amount);
+        underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 nav = rwaOracle.getNAV();
         uint256 shares = amount.wdiv(nav);
@@ -119,18 +124,14 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         // Try instant redemption from buffer
         if (amount <= liquidityBuffer) {
             liquidityBuffer -= amount;
-            IERC20(address(underlyingToken)).safeTransfer(recipient, amount);
+            underlyingToken.safeTransfer(recipient, amount);
             emit InstantRedemption(recipient, amount);
             return amount;
         }
 
         // Queue redemption if buffer insufficient (owner/keeper will process later)
-        redemptionQueue[nextRedemptionId] = RedemptionRequest({
-            user: recipient,
-            shares: shares,
-            requestedAt: block.timestamp,
-            processed: false
-        });
+        redemptionQueue[nextRedemptionId] =
+            RedemptionRequest({ user: recipient, shares: shares, requestedAt: block.timestamp, processed: false });
 
         emit RedemptionRequested(nextRedemptionId, recipient, shares);
         nextRedemptionId++;
@@ -139,7 +140,7 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         if (liquidityBuffer > 0) {
             uint256 partialAmount = liquidityBuffer;
             liquidityBuffer = 0;
-            IERC20(address(underlyingToken)).safeTransfer(recipient, partialAmount);
+            underlyingToken.safeTransfer(recipient, partialAmount);
             emit InstantRedemption(recipient, partialAmount);
             return partialAmount;
         }
@@ -180,7 +181,7 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
         require(request.user != address(0), "RWAAdapter: invalid request");
 
         request.processed = true;
-        IERC20(address(underlyingToken)).safeTransfer(request.user, assets);
+        underlyingToken.safeTransfer(request.user, assets);
 
         emit RedemptionProcessed(claimId, assets);
     }
@@ -195,7 +196,7 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     /// @notice Add liquidity to buffer
     function addLiquidityBuffer(uint256 amount) external {
         if (amount == 0) revert Errors.InvalidAmount();
-        IERC20(address(underlyingToken)).safeTransferFrom(msg.sender, address(this), amount);
+        underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
         uint256 oldBuffer = liquidityBuffer;
         liquidityBuffer += amount;
         if (liquidityBuffer > bufferCap) {
@@ -213,7 +214,7 @@ contract RWAAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner {
         // Must be in an emergency status to allow admin extraction
         require(status == Status.Blocked || status == Status.RedeemOnly, "RWAAdapter: not emergency");
-        IERC20(token).safeTransfer(to, amount);
+        IERC20Minimal(token).safeTransfer(to, amount);
         emit EmergencyWithdraw(token, to, amount);
     }
 }

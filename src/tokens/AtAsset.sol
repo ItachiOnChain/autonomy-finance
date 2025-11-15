@@ -13,33 +13,39 @@ contract AtAsset is ERC20, IERC20Mintable, IERC20Burnable {
 
     event MinterUpdated(address indexed oldMinter, address indexed newMinter);
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) ERC20(name_, symbol_, decimals_) {
+    constructor(string memory name_, string memory symbol_, uint8 decimals_) ERC20(name_, symbol_, decimals_) {
         minter = msg.sender;
     }
 
     modifier onlyMinter() {
-        if (msg.sender != minter) revert Errors.Unauthorized();
+        _onlyMinter();
         _;
     }
 
+    function _onlyMinter() internal view {
+        if (msg.sender != minter) revert Errors.Unauthorized();
+    }
+
+    /// @notice Mint `amount` tokens to `to`
+    /// @dev Only callable by the configured minter
     function mint(address to, uint256 amount) external override onlyMinter {
         _mint(to, amount);
     }
 
+    /// @notice Update the minter address
+    /// @dev Only callable by current minter
     function setMinter(address newMinter) external onlyMinter {
         address oldMinter = minter;
         minter = newMinter;
         emit MinterUpdated(oldMinter, newMinter);
     }
 
+    /// @notice Burn `amount` from caller
     function burn(uint256 amount) external override {
         _burn(msg.sender, amount);
     }
 
+    /// @notice Burn `amount` from `from` using allowance
     function burnFrom(address from, uint256 amount) external override {
         uint256 currentAllowance = allowance(from, msg.sender);
         if (currentAllowance < amount) revert Errors.InsufficientAllowance();
@@ -47,4 +53,3 @@ contract AtAsset is ERC20, IERC20Mintable, IERC20Burnable {
         _burn(from, amount);
     }
 }
-

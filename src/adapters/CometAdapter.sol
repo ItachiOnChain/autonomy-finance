@@ -24,7 +24,7 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
 
     IERC20Minimal public immutable underlyingToken;
     IComet public immutable comet;
-    
+
     uint256 public lastAccrueTime;
     uint256 public lastTotalSupply;
 
@@ -33,11 +33,7 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     /// @param initialOwner owner of this adapter (for emergencyWithdraw / admin)
     /// @param underlyingToken_ underlying ERC20 token address (e.g., USDC)
     /// @param comet_ comet protocol token/contract address
-    constructor(
-        address initialOwner,
-        IERC20Minimal underlyingToken_,
-        address comet_
-    ) Ownable(initialOwner) {
+    constructor(address initialOwner, IERC20Minimal underlyingToken_, address comet_) Ownable(initialOwner) {
         underlyingToken = underlyingToken_;
         comet = IComet(comet_);
         lastAccrueTime = block.timestamp;
@@ -127,18 +123,18 @@ contract CometAdapter is ITokenAdapter, ReentrancyGuard, Ownable {
     function harvest() external override nonReentrant returns (uint256) {
         uint256 currentSupply = comet.totalSupply();
         uint256 yieldEarned = 0;
-        
+
         if (currentSupply > lastTotalSupply) {
             yieldEarned = currentSupply - lastTotalSupply;
         }
-        
+
         lastTotalSupply = currentSupply;
         lastAccrueTime = block.timestamp;
-        
+
         if (yieldEarned > 0) {
             emit YieldHarvested(yieldEarned);
         }
-        
+
         return yieldEarned;
     }
 

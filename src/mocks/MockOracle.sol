@@ -11,7 +11,7 @@ contract MockOracle is IPriceOracle, Ownable {
 
     event PriceSet(address indexed token, uint256 price);
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(address initialOwner) Ownable(initialOwner) { }
 
     /// @notice Set price for a token
     /// @param token Token address

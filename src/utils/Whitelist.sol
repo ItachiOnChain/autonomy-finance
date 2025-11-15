@@ -9,7 +9,7 @@ contract Whitelist is Ownable {
 
     event Set(address indexed user, bool allowed);
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(address initialOwner) Ownable(initialOwner) { }
 
     /// @notice Set whitelist status for a user
     /// @param user User address

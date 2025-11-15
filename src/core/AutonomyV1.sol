@@ -51,7 +51,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
     /// @notice Mapping from debt token to total debt
     mapping(address => uint256) public totalDebt;
-    
+
     /// @notice Mapping from debt token to cumulative debt reduction (for auto-repay)
     /// @dev Used to track proportional debt reduction across all users
     mapping(address => uint256) public debtReductionFactor;
@@ -89,9 +89,8 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     modifier onlyWhitelisted() {
         if (whitelist != address(0)) {
             // Check whitelist contract via staticcall
-            (bool success, bytes memory data) = whitelist.staticcall(
-                abi.encodeWithSignature("isWhitelisted(address)", msg.sender)
-            );
+            (bool success, bytes memory data) =
+                whitelist.staticcall(abi.encodeWithSignature("isWhitelisted(address)", msg.sender));
             if (!success || data.length == 0) revert Errors.NotWhitelisted();
             bool isWhitelisted = abi.decode(data, (bool));
             if (!isWhitelisted) revert Errors.NotWhitelisted();
@@ -123,33 +122,33 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         if (address(adapter) == address(0)) revert Errors.InvalidAdapter();
         if (adapter.yieldToken() != IERC20Minimal(yieldToken)) revert Errors.InvalidYieldToken();
         if (isYieldTokenRegistered[yieldToken]) revert Errors.InvalidYieldToken();
-        
+
         yieldTokenAdapters[yieldToken] = adapter;
         isYieldTokenRegistered[yieldToken] = true;
         registeredYieldTokens.push(yieldToken);
-        
+
         // Approve adapter to burn/transfer yield tokens (for withdrawals)
         IERC20Minimal yieldTokenMinimal = IERC20Minimal(yieldToken);
         // Reset then set max to be safe for non-standard tokens
         yieldTokenMinimal.safeApprove(address(adapter), 0);
         yieldTokenMinimal.safeApprove(address(adapter), type(uint256).max);
-        
+
         // Approve adapter to transfer underlying tokens from this contract
         IERC20Minimal underlying = adapter.underlyingToken();
         underlying.safeApprove(address(adapter), 0);
         underlying.safeApprove(address(adapter), type(uint256).max);
-        
+
         emit YieldTokenRegistered(yieldToken, address(adapter));
     }
 
     function registerDebtToken(address debtToken) external onlyOwner {
         if (debtToken == address(0)) revert Errors.InvalidDebtToken();
         if (isDebtTokenRegistered[debtToken]) revert Errors.InvalidDebtToken();
-        
+
         debtTokens[debtToken] = MintableERC20(debtToken);
         isDebtTokenRegistered[debtToken] = true;
         registeredDebtTokens.push(debtToken);
-        
+
         emit DebtTokenRegistered(debtToken);
     }
 
@@ -167,7 +166,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     function getTotalDeposited(address yieldToken) external view override returns (uint256) {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
-        
+
         uint256 shares = totalDepositedShares[yieldToken];
         uint256 exchangeRate = adapter.getExchangeRate();
         return shares.wmul(exchangeRate);
@@ -183,17 +182,17 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
     function getCollateralValue(address account) public view override returns (uint256) {
         uint256 totalValue = 0;
-        
+
         // Iterate through all registered yield tokens
         for (uint256 i = 0; i < registeredYieldTokens.length; i++) {
             address yieldToken = registeredYieldTokens[i];
             uint256 shares = depositedShares[account][yieldToken];
-            
+
             if (shares > 0) {
                 ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
                 uint256 exchangeRate = adapter.getExchangeRate();
                 uint256 underlyingAmount = shares.wmul(exchangeRate);
-                
+
                 // Get price from oracle
                 IERC20Minimal underlying = adapter.underlyingToken();
                 uint256 price = oracle.priceInDebt(address(underlying));
@@ -201,29 +200,29 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
                 totalValue += value;
             }
         }
-        
+
         return totalValue;
     }
 
     function getDebtValue(address account) public view override returns (uint256) {
         uint256 totalDebtValue = 0;
-        
+
         // Iterate through all registered debt tokens
         for (uint256 i = 0; i < registeredDebtTokens.length; i++) {
             address debtToken = registeredDebtTokens[i];
             uint256 userDebt = debt[account][debtToken];
-            
+
             // Apply debt reduction factor if any
             if (userDebt > 0 && debtReductionFactor[debtToken] > 0) {
                 uint256 reduction = (userDebt * debtReductionFactor[debtToken]) / 1e18;
                 userDebt = userDebt > reduction ? userDebt - reduction : 0;
             }
-            
+
             // Get price from oracle (debt token price in debt units)
             uint256 price = oracle.priceInDebt(debtToken);
             totalDebtValue += userDebt.wmul(price);
         }
-        
+
         return totalDebtValue;
     }
 
@@ -235,9 +234,9 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     function isLiquidatable(address account) public view override returns (bool) {
         uint256 collateralValue = getCollateralValue(account);
         uint256 debtValue = getDebtValue(account);
-        
+
         if (debtValue == 0) return false;
-        
+
         uint256 ratio = collateralValue.wdiv(debtValue);
         return ratio < LIQUIDATION_THRESHOLD;
     }
@@ -247,7 +246,14 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address yieldToken,
         uint256 amount,
         address recipient
-    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("deposit(address,uint256,address)")))) returns (uint256) {
+    )
+        external
+        override
+        nonReentrant
+        onlyWhitelisted
+        whenNotPausedFunction(bytes4(keccak256(bytes("deposit(address,uint256,address)"))))
+        returns (uint256)
+    {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
         if (amount == 0) revert Errors.InvalidAmount();
@@ -259,7 +265,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         underlying.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 shares = adapter.deposit(amount, address(this));
-        
+
         totalDepositedShares[yieldToken] += shares;
         depositedShares[recipient][yieldToken] += shares;
 
@@ -271,8 +277,17 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address yieldToken,
         uint256 shares,
         address recipient
-    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("withdraw(address,uint256,address)")))) returns (uint256) {
-        if (shares == 0) revert Errors.InvalidAmount();
+    )
+        external
+        override
+        nonReentrant
+        onlyWhitelisted
+        whenNotPausedFunction(bytes4(keccak256(bytes("withdraw(address,uint256,address)"))))
+        returns (uint256)
+    {
+        if (shares == 0) {
+            revert Errors.InvalidAmount();
+        }
         if (depositedShares[msg.sender][yieldToken] < shares) revert Errors.InsufficientBalance();
 
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
@@ -283,16 +298,16 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
         // Check if withdrawal would make position undercollateralized
         uint256 debtValue = getDebtValue(msg.sender);
-        
+
         if (debtValue > 0) {
             uint256 collateralValue = getCollateralValue(msg.sender);
             uint256 exchangeRate = adapter.getExchangeRate();
             IERC20Minimal underlying = adapter.underlyingToken();
             uint256 price = oracle.priceInDebt(address(underlying));
             uint256 sharesValue = shares.wmul(exchangeRate).wmul(price);
-            
+
             uint256 newCollateralValue = collateralValue - sharesValue;
-            
+
             // Check if new ratio is below minimum
             if (newCollateralValue.wdiv(debtValue) < MINIMUM_COLLATERALIZATION_RATIO) {
                 revert Errors.InsufficientCollateral();
@@ -313,7 +328,13 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address debtToken,
         uint256 amount,
         address recipient
-    ) external override nonReentrant onlyWhitelisted whenNotPausedFunction(bytes4(keccak256(bytes("mint(address,uint256,address)")))) {
+    )
+        external
+        override
+        nonReentrant
+        onlyWhitelisted
+        whenNotPausedFunction(bytes4(keccak256(bytes("mint(address,uint256,address)"))))
+    {
         if (amount == 0) revert Errors.InvalidAmount();
         if (address(debtTokens[debtToken]) == address(0)) revert Errors.InvalidDebtToken();
 
@@ -344,7 +365,12 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address debtToken,
         uint256 amount,
         address recipient
-    ) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("repay(address,uint256,address)")))) {
+    )
+        external
+        override
+        nonReentrant
+        whenNotPausedFunction(bytes4(keccak256(bytes("repay(address,uint256,address)"))))
+    {
         if (amount == 0) revert Errors.InvalidAmount();
         if (debt[recipient][debtToken] < amount) revert Errors.InsufficientDebt();
 
@@ -362,7 +388,7 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
             totalDebt[debtToken] -= reduction;
             debtReductionFactor[debtToken] = 0; // Reset after applying
         }
-        
+
         IERC20Burnable(debtToken).burnFrom(msg.sender, amount);
 
         debt[recipient][debtToken] -= amount;
@@ -375,7 +401,12 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
         address account,
         address yieldToken,
         uint256 shares
-    ) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("liquidate(address,address,uint256)")))) {
+    )
+        external
+        override
+        nonReentrant
+        whenNotPausedFunction(bytes4(keccak256(bytes("liquidate(address,address,uint256)"))))
+    {
         if (!isLiquidatable(account)) revert Errors.InvalidPosition();
         if (shares == 0) revert Errors.InvalidAmount();
         if (depositedShares[account][yieldToken] < shares) revert Errors.InsufficientBalance();
@@ -399,22 +430,22 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
 
         // Repay debt proportionally across all debt tokens
         uint256 debtToRepay = (maxDebtToRepay > totalAccountDebt) ? totalAccountDebt : maxDebtToRepay;
-        
+
         for (uint256 i = 0; i < registeredDebtTokens.length; i++) {
             address debtToken = registeredDebtTokens[i];
             uint256 accountDebt = debt[account][debtToken];
-            
+
             if (accountDebt > 0) {
                 uint256 debtTokenPrice = oracle.priceInDebt(debtToken);
                 uint256 accountDebtValue = accountDebt.wmul(debtTokenPrice);
                 uint256 debtShare = (accountDebtValue * debtToRepay) / totalAccountDebt;
                 uint256 debtShareAmount = debtShare.wdiv(debtTokenPrice);
-                
+
                 if (debtShareAmount > accountDebt) debtShareAmount = accountDebt;
-                
+
                 // Burn debt tokens from liquidator (they need to have them)
                 IERC20Burnable(debtToken).burnFrom(msg.sender, debtShareAmount);
-                
+
                 debt[account][debtToken] -= debtShareAmount;
                 totalDebt[debtToken] -= debtShareAmount;
             }
@@ -430,13 +461,19 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
     }
 
     // ============ Keeper Functions ============
-    function harvest(address yieldToken) external override nonReentrant whenNotPausedFunction(bytes4(keccak256(bytes("harvest(address)")))) returns (uint256) {
+    function harvest(address yieldToken)
+        external
+        override
+        nonReentrant
+        whenNotPausedFunction(bytes4(keccak256(bytes("harvest(address)"))))
+        returns (uint256)
+    {
         ITokenAdapter adapter = yieldTokenAdapters[yieldToken];
         if (address(adapter) == address(0)) revert Errors.InvalidYieldToken();
 
         // Harvest yield (adapter.harvest() returns the yield amount)
         uint256 actualYield = adapter.harvest();
-        
+
         // Apply yield to reduce debt (auto-repay)
         uint256 amountBurned = _applyYield(yieldToken, actualYield);
 
@@ -499,14 +536,14 @@ contract AutonomyV1 is IAutonomyV1, ReentrancyGuard, Ownable {
             if (debtShareAmount > 0) {
                 // Reduce total debt
                 totalDebt[debtToken] -= debtShareAmount;
-                
+
                 // Track reduction factor for proportional user debt reduction
                 // This allows us to reduce user debt proportionally on next interaction
                 if (debtTokenTotalDebt > 0) {
                     uint256 reductionFactor = (debtShareAmount * 1e18) / debtTokenTotalDebt;
                     debtReductionFactor[debtToken] += reductionFactor;
                 }
-                
+
                 // Mint debt tokens to protocol and burn them (auto-repay)
                 debtTokens[debtToken].mint(address(this), debtShareAmount);
                 IERC20Burnable(debtToken).burn(debtShareAmount);

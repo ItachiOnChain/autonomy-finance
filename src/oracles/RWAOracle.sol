@@ -7,18 +7,14 @@ import "../base/Errors.sol";
 /// @notice RWA Oracle for NAV-based pricing
 /// @dev Manages NAV per share with staleness and jump guards
 contract RWAOracle is Ownable {
-    uint256 public navPerShare;   // 1e18
+    uint256 public navPerShare; // 1e18
     uint64 public lastUpdate;
     uint64 public validUntil;
     uint256 public maxDailyChangeBps; // e.g., 150 = 1.5%
 
     event NAVUpdated(uint256 nav, uint64 validUntil);
 
-    constructor(
-        address initialOwner,
-        uint256 initialNAV,
-        uint256 maxChangeBps
-    ) Ownable(initialOwner) {
+    constructor(address initialOwner, uint256 initialNAV, uint256 maxChangeBps) Ownable(initialOwner) {
         navPerShare = initialNAV;
         maxDailyChangeBps = maxChangeBps;
         lastUpdate = uint64(block.timestamp);
@@ -31,14 +27,14 @@ contract RWAOracle is Ownable {
     function updateNAV(uint256 nav, uint64 _validUntil) external onlyOwner {
         // Enforce staleness
         require(_validUntil >= block.timestamp, "stale");
-        
+
         uint256 old = navPerShare;
         if (old != 0) {
             // Enforce jump guard
             uint256 diff = old > nav ? old - nav : nav - old;
-            require(diff * 10000 / old <= maxDailyChangeBps, "jump");
+            require(diff * 10_000 / old <= maxDailyChangeBps, "jump");
         }
-        
+
         navPerShare = nav;
         lastUpdate = uint64(block.timestamp);
         validUntil = _validUntil;

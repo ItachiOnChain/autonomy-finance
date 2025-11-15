@@ -7,7 +7,7 @@ import "../base/Errors.sol";
 
 /// @notice Burnable ERC20 token
 contract BurnableERC20 is ERC20, IERC20Burnable {
-    constructor(string memory name_, string memory symbol_, uint8 decimals_) ERC20(name_, symbol_, decimals_) {}
+    constructor(string memory name_, string memory symbol_, uint8 decimals_) ERC20(name_, symbol_, decimals_) { }
 
     function burn(uint256 amount) external override {
         _burn(msg.sender, amount);

@@ -38,7 +38,9 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
         string memory yieldTokenSymbol,
         uint256 initialExchangeRate,
         uint256 apy_
-    ) Ownable(initialOwner) {
+    )
+        Ownable(initialOwner)
+    {
         underlyingToken = underlyingToken_;
         _yieldToken = new MintableBurnableERC20(yieldTokenName, yieldTokenSymbol, 18);
         _yieldToken.setMinter(address(this));
@@ -58,12 +60,7 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
     }
 
     /// @notice Deposit underlying & mint yield shares to recipient
-    function deposit(uint256 amount, address recipient)
-        external
-        override
-        nonReentrant
-        returns (uint256)
-    {
+    function deposit(uint256 amount, address recipient) external override nonReentrant returns (uint256) {
         _updateExchangeRate();
 
         // Pull underlying from caller (uses local SafeERC20Lib)
@@ -81,12 +78,7 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
     /// Autonomy holds the yield tokens, so `msg.sender` must be the one whose
     /// yield tokens are burned. Recipient only receives the underlying.
     /// ------------------------------------------------------------------------
-    function withdraw(uint256 shares, address recipient)
-        external
-        override
-        nonReentrant
-        returns (uint256)
-    {
+    function withdraw(uint256 shares, address recipient) external override nonReentrant returns (uint256) {
         _updateExchangeRate();
 
         // Burn yield tokens from caller (Autonomy/core)
@@ -142,8 +134,7 @@ contract Adapter is ITokenAdapter, ReentrancyGuard, Ownable {
         uint256 timeElapsed = block.timestamp - lastUpdateTime;
         if (timeElapsed == 0) return exchangeRate;
 
-        uint256 rateMultiplier =
-            FixedPointMath.WAD + (apy * timeElapsed) / SECONDS_PER_YEAR;
+        uint256 rateMultiplier = FixedPointMath.WAD + (apy * timeElapsed) / SECONDS_PER_YEAR;
 
         return exchangeRate.wmul(rateMultiplier);
     }

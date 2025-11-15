@@ -14,6 +14,12 @@ contract ERC20 is IERC20Metadata {
     uint8 private _decimals;
     uint256 private _totalSupply;
 
+    /// @notice ERC20 Transfer event
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /// @notice ERC20 Approval event
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
     constructor(string memory name_, string memory symbol_, uint8 decimals_) {
         _name = name_;
         _symbol = symbol_;
@@ -63,31 +69,38 @@ contract ERC20 is IERC20Metadata {
     }
 
     function _transfer(address from, address to, uint256 amount) internal {
+        if (from == address(0)) revert Errors.InvalidAddress();
         if (to == address(0)) revert Errors.InvalidAddress();
-        if (from != address(0) && _balances[from] < amount) revert Errors.InsufficientBalance();
+        if (_balances[from] < amount) revert Errors.InsufficientBalance();
 
-        if (from != address(0)) {
-            _balances[from] -= amount;
-        }
+        _balances[from] -= amount;
         _balances[to] += amount;
+
+        emit Transfer(from, to, amount);
     }
 
     function _mint(address to, uint256 amount) internal {
         if (to == address(0)) revert Errors.InvalidAddress();
         _totalSupply += amount;
         _balances[to] += amount;
+
+        emit Transfer(address(0), to, amount);
     }
 
     function _burn(address from, uint256 amount) internal {
+        if (from == address(0)) revert Errors.InvalidAddress();
         if (_balances[from] < amount) revert Errors.InsufficientBalance();
         _balances[from] -= amount;
         _totalSupply -= amount;
+
+        emit Transfer(from, address(0), amount);
     }
 
     function _approve(address owner, address spender, uint256 amount) internal {
         if (owner == address(0)) revert Errors.InvalidAddress();
         if (spender == address(0)) revert Errors.InvalidAddress();
         _allowances[owner][spender] = amount;
+
+        emit Approval(owner, spender, amount);
     }
 }
-
