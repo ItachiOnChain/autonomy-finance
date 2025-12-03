@@ -1,0 +1,5 @@
+{
+    "interestRate": 5.23,
+    "collateralPrice": 1.00,
+    "liquidationThreshold": 0.75
+}

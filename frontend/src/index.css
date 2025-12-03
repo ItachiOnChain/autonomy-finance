@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #000 !important;
+  overscroll-behavior: none;
+}
+
+
+@layer base {
+  body {
+    @apply bg-background text-black font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans font-bold;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 border border-black bg-white text-black font-mono uppercase text-sm hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer;
+  }
+
+  .card {
+    @apply bg-surface border border-black p-6;
+  }
+
+  .input {
+    @apply w-full bg-white border border-black p-3 font-mono text-gray-900 focus:outline-none focus:ring-1 focus:ring-black;
+  }
+}
+
+.lz-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 42px 42px;
+  animation: lzMove 20s linear infinite;
+}
+
+@keyframes lzMove {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 300px 300px;
+  }
+}

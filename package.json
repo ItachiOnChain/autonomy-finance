@@ -1,0 +1,12 @@
+{
+    "name": "story-autonomy-finance",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "chain": "anvil --chain-id 31337 --port 8545",
+        "deploy": "bash ./scripts/deploy-local.sh",
+        "sync-contracts": "node ./scripts/sync-frontend.js",
+        "dev": "cd frontend && npm run dev",
+        "test": "cd contracts && forge test"
+    }
+}

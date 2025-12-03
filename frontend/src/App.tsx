@@ -1,0 +1,116 @@
+import { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Landing } from './pages/Landing';
+import { Core } from './pages/Core';
+import { Asset } from './pages/Asset';
+import { Layout } from './components/Layout';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { IPMint } from './pages/IPMint';
+import { IPDashboard } from './components/IPDashboard';
+
+// -------------------------------
+// ⭐ Theme Context
+// -------------------------------
+const ThemeContext = createContext({
+  theme: "dark",
+  toggleTheme: () => { },
+});
+
+// export hook
+export const useTheme = () => useContext(ThemeContext);
+
+// -------------------------------
+// ⭐ Main App
+// -------------------------------
+function App() {
+  // persistent theme
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("autonomy_theme") || "dark";
+  });
+
+  // persist theme
+  useEffect(() => {
+    localStorage.setItem("autonomy_theme", theme);
+
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <Router>
+        {/* Theme wrapper */}
+        <div className={theme === "dark" ? "dark" : ""}>
+          <Routes>
+            {/* Landing page */}
+            <Route
+              path="/"
+              element={
+                <Layout>
+                  <Landing />
+                </Layout>
+              }
+            />
+
+            {/* Core multi-asset dashboard */}
+            <Route
+              path="/core"
+              element={
+                <Layout>
+                  <ErrorBoundary>
+                    <Core />
+                  </ErrorBoundary>
+                </Layout>
+              }
+            />
+
+            {/* Per-asset page */}
+            <Route
+              path="/asset/:symbol"
+              element={
+                <Layout>
+                  <ErrorBoundary>
+                    <Asset />
+                  </ErrorBoundary>
+                </Layout>
+              }
+            />
+
+            {/* IP Minting Page */}
+            <Route
+              path="/ip-mint"
+              element={
+                <Layout>
+                  <ErrorBoundary>
+                    <IPMint />
+                  </ErrorBoundary>
+                </Layout>
+              }
+            />
+
+            {/* IP Dashboard Page */}
+            <Route
+              path="/ip-dashboard"
+              element={
+                <Layout>
+                  <ErrorBoundary>
+                    <IPDashboard />
+                  </ErrorBoundary>
+                </Layout>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeContext.Provider>
+  );
+}
+
+export default App;

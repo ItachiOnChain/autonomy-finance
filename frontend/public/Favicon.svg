@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- outer glow background (transparent for favicon) -->
+  <rect width="64" height="64" rx="14" fill="#020303"/>
+  <!-- neon green square -->
+  <rect x="14" y="14" width="36" height="36" rx="8" fill="#8AE06C"/>
+  <!-- inner cutout to echo navbar icon -->
+  <rect x="24" y="24" width="16" height="16" rx="4" fill="#020303"/>
+  <!-- tiny bar to hint "credit / finance" -->
+  <rect x="24" y="42" width="16" height="2" rx="1" fill="#CFF8B1"/>
+</svg>

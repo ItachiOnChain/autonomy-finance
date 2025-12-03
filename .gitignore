@@ -1,0 +1,99 @@
+# Foundry
+cache/
+out/
+broadcast/
+
+# Foundry dependencies (managed by git submodules or forge install)
+lib/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+.next/
+.turbo/
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Process files
+*.pid
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+tmp/
+
+# Web3 / Blockchain specific
+deployments.json
+typechain-types/
+artifacts/
+coverage/
+coverage.json
+.coverage_artifacts/
+.coverage_cache/
+.coverage_contracts/
+
+# Testing
+.hypothesis/
+.pytest_cache/
+
+# Hardhat (if used)
+hardhat-cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.turbo
+.vercel
+.netlify
+
+# Added during cleanup
+.parcel-cache/
+dev-anvil-state.json
