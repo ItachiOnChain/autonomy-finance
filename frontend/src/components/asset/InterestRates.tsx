@@ -19,7 +19,7 @@ export const InterestRates: React.FC<InterestRatesProps> = ({ asset, rates }) =>
 
             <div className="grid grid-cols-2 gap-6">
                 <div>
-                    <div className="text-sm text-gray-500 mb-2">Supply APY</div>
+                    <div className="text-sm text-gray-500 mb-2">APY</div>
                     <div className="text-3xl font-bold text-green-600">
                         {supplyAPR.toFixed(2)}%
                     </div>
@@ -29,7 +29,7 @@ export const InterestRates: React.FC<InterestRatesProps> = ({ asset, rates }) =>
                 </div>
 
                 <div>
-                    <div className="text-sm text-gray-500 mb-2">Borrow APR</div>
+                    <div className="text-sm text-gray-500 mb-2">APR</div>
                     <div className="text-3xl font-bold text-red-600">
                         {borrowAPR.toFixed(2)}%
                     </div>

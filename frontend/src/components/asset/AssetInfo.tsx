@@ -22,10 +22,7 @@ export const AssetInfo: React.FC<AssetInfoProps> = ({ asset }) => {
                     <span className="text-gray-600">Can be collateral</span>
                     <span className="font-bold">{asset.canBeCollateral ? '✓ Yes' : '✗ No'}</span>
                 </div>
-                <div className="flex justify-between">
-                    <span className="text-gray-600">Decimals</span>
-                    <span className="font-mono">{asset.decimals}</span>
-                </div>
+
             </div>
         </div>
     );

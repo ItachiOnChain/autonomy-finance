@@ -41,7 +41,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ symbol, type }) => {
                 {/* APY/APR */}
                 <div className="text-right">
                     <div className="text-xs text-gray-500 mb-1">
-                        {type === 'supply' ? 'Supply APY' : 'Borrow APR'}
+                        {type === 'supply' ? 'APY' : 'APR'}
                     </div>
                     <div className="text-xl font-bold" style={{ color: asset.color }}>
                         {displayAPR.toFixed(2)}%

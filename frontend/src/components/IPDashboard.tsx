@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { formatUnits } from 'viem';
 import { IPSimulator } from './IPSimulator';
 import { useStoryProtocol } from '../hooks/useStoryProtocol';
@@ -50,7 +51,15 @@ export function IPDashboard() {
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-8">
-            <h1 className="text-3xl font-bold text-white">IP Dashboard</h1>
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-white">IP Dashboard</h1>
+                <Link
+                    to="/ip-mint"
+                    className="bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg font-bold transition-colors"
+                >
+                    + Create New IP
+                </Link>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left Column: IP Details */}
@@ -101,8 +110,8 @@ export function IPDashboard() {
                                                     <div
                                                         key={token.symbol}
                                                         className={`p-3 rounded-lg ${hasBalance
-                                                                ? 'bg-green-900/20 border border-green-700'
-                                                                : 'bg-gray-900/50 border border-gray-700'
+                                                            ? 'bg-green-900/20 border border-green-700'
+                                                            : 'bg-gray-900/50 border border-gray-700'
                                                             }`}
                                                     >
                                                         <p className="text-xs text-gray-400 uppercase">{token.symbol}</p>

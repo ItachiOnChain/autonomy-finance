@@ -33,17 +33,20 @@ const Divider: React.FC = () => (
   <span className="text-primary/40 select-none">|</span>
 );
 
+import { Link } from 'react-router-dom';
+
 /* Nav Item Component */
-const NavItem: React.FC<{ children: React.ReactNode; className?: string }> = ({
+const NavItem: React.FC<{ to: string; children: React.ReactNode; className?: string }> = ({
+  to,
   children,
   className = "",
 }) => (
-  <a
-    href="#"
+  <Link
+    to={to}
     className={`hover:text-primary transition drop-shadow-[0_0_4px_rgba(138,224,108,0.25)] ${className}`}
   >
     {children}
-  </a>
+  </Link>
 );
 
 /* ============================================================
@@ -71,7 +74,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* LEFT WORDMARK LOGO */}
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             {/* favicon icon */}
             <div className="w-7 h-7 rounded-[8px] bg-primary/15 shadow-[0_0_16px_#8AE06C] flex items-center justify-center overflow-hidden">
               <img
@@ -90,7 +93,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 FINANCE
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* CENTER NAV */}
           <nav
@@ -98,15 +101,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               text-sm font-mono 
               text-black/70 dark:text-white/70"
           >
-            <NavItem>Protocol</NavItem>
+            <NavItem to="/core">Protocol</NavItem>
             <Divider />
-            <NavItem>
+            <NavItem to="/ip-mint">Mint IP</NavItem>
+            <Divider />
+            <NavItem to="/ip-dashboard">IP Dashboard</NavItem>
+            <Divider />
+            <NavItem to="/core">
               <AnimatedNavWord />
             </NavItem>
-            <Divider />
-            <NavItem>Creators</NavItem>
-            <Divider />
-            <NavItem>Docs</NavItem>
           </nav>
 
           {/* RIGHT SIDE: WALLET (neon green glow) */}

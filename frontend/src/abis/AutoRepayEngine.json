@@ -1,117 +1,924 @@
-
-╭-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------╮
-| Type        | Signature                                                                                         | Selector                                                           |
-+======================================================================================================================================================================================+
-| event       | AutoRepayExecuted(address,uint256,uint256)                                                        | 0x2310ec15b722c6f98f0e13153c5c14969b98f43459e8b111484e0b94b31c8491 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | ConversionFeeUpdated(uint256,uint256)                                                             | 0xa5a6ad6f3528204b2c97451b1f5df06191d8eb8fe5021c905e1778b888e93088 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | IPReleased(address,address)                                                                       | 0x101e421a9c7c0649c4f6ceae3c6e26a4f4ac618f82168f1e1ef8087b08574120 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | LendingPoolRepaySucceeded(address,address,uint256)                                                | 0xdd7a6500474912a9e475aa6f1e8ca947b7c1aa1f6239a70b7cd6655c1a117a2e |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | OffChainConversionRequired(address,bytes32,address,uint256)                                       | 0x5f10e4f12e37ca91a6cd2e675febe3cc80514b2e15c2ca1a4a23ab28f42601cc |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | OracleSet(address,address)                                                                        | 0xc1d3048301c0d23629a2532c8defa6d68f8e1a0e4157918769e9fb1b2eeb888e |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | OwnershipTransferred(address,address)                                                             | 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | RepayTokenUpdated(address,address)                                                                | 0xc702c05393a8e3256c786eea272757ffd614158cd63143e854aa93b7cc8b582c |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | RouterUpdated(address,address)                                                                    | 0x02dc5c233404867c793b749c6d644beb2277536d18a7e7974d3f238e4c6f1684 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | RoyaltyRepayFailed(address,string)                                                                | 0x0528d1d0e18f6850b941a72d6c2ba4e170b36e4dbeec22623988262311f07765 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | RoyaltyRepayInitiated(address,bytes32,address,uint256)                                            | 0xffc814fca0fd2bd8b90dff345bf6430c0451dd6d9d2910b807c8e2c2d4fc49cf |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | RoyaltyRepaySucceeded(address,uint256,uint256)                                                    | 0xe2ead6c99c21975831641b4a946574d048f3d13dd0a2ebe0a7dff7cc45f7ef8a |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | SupportedAssetAdded(address)                                                                      | 0x3ebc37c7ad88888fc79c591d53847cf755b23698bc448d2c3f39cce8acbe492b |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | TokenConverted(address,address,uint256,uint256,uint256)                                           | 0x3cfea5691fc7d0cfea557ece65b29e398be81f3ca7f727972b7c7f718162a48c |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | TokenWhitelisted(address,bool)                                                                    | 0xef81a9943b96c8df4ef243401c9bf5159146166211356898b52d382086168d92 |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| event       | TreasuryUpdated(address,address)                                                                  | 0x4ab5be82436d353e61ca18726e984e561f5c1cc7c6d38b29d2553c790434705a |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | IPNotLocked()                                                                                     | 0x5ae5fc28                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | InsufficientRoyalties()                                                                           | 0xa8449609                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | NoActiveDebt()                                                                                    | 0x9aa8665a                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | OwnableInvalidOwner(address)                                                                      | 0x1e4fbdf7                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | OwnableUnauthorizedAccount(address)                                                               | 0x118cdaa7                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | ReentrancyGuardReentrantCall()                                                                    | 0x3ee5aeb5                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | SafeERC20FailedOperation(address)                                                                 | 0x5274afe7                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| error       | ZeroAddress()                                                                                     | 0xd92e233d                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | MAX_SLIPPAGE_BPS() view returns (uint256)                                                         | 0xe229cd76                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | WETH() view returns (address)                                                                     | 0xad5c4648                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | addSupportedAsset(address) nonpayable                                                             | 0xfac09e87                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | autoRepayFromRoyalty(bytes32,address,uint256,uint256,uint16,address) nonpayable returns (uint256) | 0xf9db1ef8                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | conversionFeeBps() view returns (uint256)                                                         | 0x7c2e9396                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | executeAutoRepay(address) nonpayable returns (uint256)                                            | 0xc5d07651                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | getSupportedAsset(uint256) view returns (address)                                                 | 0x60a8b18a                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | getSupportedAssetsCount() view returns (uint256)                                                  | 0x68625807                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | ipManager() view returns (IIPManager)                                                             | 0xb9e4f7e2                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | lendingPool() view returns (ILendingPool)                                                         | 0xa59a9973                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | oracles(address) view returns (address)                                                           | 0xaddd5099                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | owner() view returns (address)                                                                    | 0x8da5cb5b                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | renounceOwnership() nonpayable                                                                    | 0x715018a6                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | repayToken() view returns (address)                                                               | 0xb699a7ba                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | router() view returns (IUniswapV2Router02)                                                        | 0xf887ea40                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setConversionFee(uint256) nonpayable                                                              | 0xc88b7c8e                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setIPManager(address) nonpayable                                                                  | 0x1636045a                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setLendingPool(address) nonpayable                                                                | 0x113aa8b1                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setOracle(address,address) nonpayable                                                             | 0x5c38eb3a                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setRepayToken(address) nonpayable                                                                 | 0x3db28a7d                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setRouter(address) nonpayable                                                                     | 0xc0d78655                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setTreasury(address) nonpayable                                                                   | 0xf0f44260                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setVault(address) nonpayable                                                                      | 0x6817031b                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setWETH(address) nonpayable                                                                       | 0x5b769f3c                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | setWhitelistedToken(address,bool) nonpayable                                                      | 0x76ce28f1                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | simulateAutoRepay(address) view returns (IAutoRepayEngine.RepaymentSimulation)                    | 0x4ff33b02                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | supportedAssets(uint256) view returns (address)                                                   | 0xc68dbb37                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | transferOwnership(address) nonpayable                                                             | 0xf2fde38b                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | treasury() view returns (address)                                                                 | 0x61d027b3                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | vault() view returns (IAutonomyVault)                                                             | 0xfbfa77cf                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| function    | whitelistedTokens(address) view returns (bool)                                                    | 0xdaf9c210                                                         |
-|-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------|
-| constructor | constructor() nonpayable                                                                          |                                                                    |
-╰-------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------╯
-
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "MAX_SLIPPAGE_BPS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "WETH",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "addSupportedAsset",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "autoRepayFromRoyalty",
+    "inputs": [
+      {
+        "name": "ipaId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "claimedToken",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "claimedAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minRepayOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "slippageBps",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "preferredDebtAsset",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "conversionFeeBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "executeAutoRepay",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getSupportedAsset",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getSupportedAssetsCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ipManager",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IIPManager"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lendingPool",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ILendingPool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "oracles",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "repayToken",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "router",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IUniswapV2Router02"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setConversionFee",
+    "inputs": [
+      {
+        "name": "feeBps",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setIPManager",
+    "inputs": [
+      {
+        "name": "_ipManager",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setLendingPool",
+    "inputs": [
+      {
+        "name": "_lendingPool",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setOracle",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "oracle",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setRepayToken",
+    "inputs": [
+      {
+        "name": "_repayToken",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setRouter",
+    "inputs": [
+      {
+        "name": "_router",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setTreasury",
+    "inputs": [
+      {
+        "name": "_treasury",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setVault",
+    "inputs": [
+      {
+        "name": "_vault",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setWETH",
+    "inputs": [
+      {
+        "name": "_weth",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setWhitelistedToken",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "status",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "simulateAutoRepay",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct IAutoRepayEngine.RepaymentSimulation",
+        "components": [
+          {
+            "name": "royaltiesAvailable",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "currentDebt",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "repaymentAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "remainingDebt",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "willReleaseIP",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "supportedAssets",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "treasury",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "vault",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IAutonomyVault"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "whitelistedTokens",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "AutoRepayExecuted",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "remainingDebt",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ConversionFeeUpdated",
+    "inputs": [
+      {
+        "name": "oldFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "newFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "IPReleased",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "ipAsset",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LendingPoolRepaySucceeded",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "asset",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "repaidAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OffChainConversionRequired",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "ipaId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OracleSet",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "oracle",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RepayTokenUpdated",
+    "inputs": [
+      {
+        "name": "oldToken",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newToken",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RouterUpdated",
+    "inputs": [
+      {
+        "name": "oldRouter",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newRouter",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoyaltyRepayFailed",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoyaltyRepayInitiated",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "ipaId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "claimedToken",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "claimedAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoyaltyRepaySucceeded",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "repaidAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "remainingDebt",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SupportedAssetAdded",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenConverted",
+    "inputs": [
+      {
+        "name": "tokenIn",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOut",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "amountOut",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "fee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenWhitelisted",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "status",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TreasuryUpdated",
+    "inputs": [
+      {
+        "name": "oldTreasury",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newTreasury",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "IPNotLocked",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientRoyalties",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoActiveDebt",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SafeERC20FailedOperation",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
+  }
+]

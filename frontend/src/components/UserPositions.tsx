@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatUnits } from 'viem';
 import { useAccount } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
 import { ASSETS } from '../config/assets';
 import { useUserPosition, useAssetData } from '../hooks/useLendingPool';
 import { CONTRACTS } from '../config/contracts';
@@ -12,6 +13,7 @@ interface UserPositionRowProps {
 }
 
 const UserPositionRow: React.FC<UserPositionRowProps> = ({ symbol, type }) => {
+    const navigate = useNavigate();
     const asset = ASSETS.find(a => a.symbol === symbol);
 
     const assetAddress = asset ? (CONTRACTS as any)[asset.symbol]?.address as string : undefined;
@@ -30,8 +32,17 @@ const UserPositionRow: React.FC<UserPositionRowProps> = ({ symbol, type }) => {
     // Don't render if no position
     if (amount === 0n) return null;
 
+    const handleNavigate = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/asset/${symbol}`);
+    };
+
     return (
-        <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+        <div
+            className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={handleNavigate}
+        >
             {/* Asset Info */}
             <div className="flex items-center gap-3 flex-1">
                 <div className="text-2xl">{asset.logo}</div>
@@ -62,11 +73,8 @@ const UserPositionRow: React.FC<UserPositionRowProps> = ({ symbol, type }) => {
             {/* Actions */}
             <div className="flex-none">
                 <button
-                    className="text-xs px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-colors text-gray-700"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        window.location.href = `/ asset / ${symbol} `;
-                    }}
+                    className="text-xs px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-700"
+                    onClick={handleNavigate}
                 >
                     Details
                 </button>
@@ -111,7 +119,7 @@ export const UserPositions: React.FC = () => {
                     {hasSupplies ? (
                         <div className="space-y-1">
                             {allAssets.map(asset => (
-                                <UserPositionRow key={`supply - ${asset.symbol} `} symbol={asset.symbol} type="supply" />
+                                <UserPositionRow key={`supply-${asset.symbol}`} symbol={asset.symbol} type="supply" />
                             ))}
                         </div>
                     ) : (
