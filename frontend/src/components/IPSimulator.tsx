@@ -79,14 +79,6 @@ export function IPSimulator({ onRoyaltyPaid }: IPSimulatorProps) {
                         className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white text-sm focus:outline-none focus:border-blue-500"
                     >
                         <option value={CONTRACTS.MockRoyaltyToken.address}>MOCK Token</option>
-                        <option value={CONTRACTS.USDC.address}>USDC</option>
-                        <option value={CONTRACTS.USDT.address}>USDT</option>
-                        <option value={CONTRACTS.WETH.address}>WETH</option>
-                        <option value={CONTRACTS.WBTC.address}>WBTC</option>
-                        <option value={CONTRACTS.DAI.address}>DAI</option>
-                        <option value={CONTRACTS.LINK.address}>LINK</option>
-                        <option value={CONTRACTS.UNI.address}>UNI</option>
-                        <option value={CONTRACTS.AAVE.address}>AAVE</option>
                     </select>
                 </div>
 

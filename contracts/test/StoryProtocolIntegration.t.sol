@@ -241,7 +241,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(usdc),
             500 * 1e6,
             490 * 1e6, // minOut (with slippage)
-            100 // 1% slippage
+            100, // 1% slippage
+            address(0)
         );
 
         // Fee deducted: 500 * 0.001 = 0.5 USDC
@@ -271,7 +272,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(mockToken),
             500 * 1e18,
             490 * 1e6, // minOut
-            100 // 1% slippage
+            100, // 1% slippage
+            address(0)
         );
 
         assertGt(repaid, 0);
@@ -297,7 +299,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(mockToken),
             500 * 1e18,
             600 * 1e6, // Unrealistic minOut
-            100
+            100,
+            address(0)
         );
     }
 
@@ -320,7 +323,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(nonWhitelisted),
             500 * 1e18,
             490 * 1e6,
-            100
+            100,
+            address(0)
         );
     }
 
@@ -379,7 +383,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(usdc),
             500 * 1e6,
             490 * 1e6,
-            100
+            100,
+            address(0)
         );
 
         // Should repay partial amount
@@ -410,7 +415,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(mockToken),
             1000 * 1e18,
             990 * 1e6,
-            100
+            100,
+            address(0)
         );
 
         // Check treasury received fee
@@ -456,7 +462,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(usdt),
             500 * 1e6,
             490 * 1e6, // minOut (with slippage)
-            100 // 1% slippage
+            100, // 1% slippage
+            address(0)
         );
 
         // Verify repayment occurred
@@ -503,7 +510,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(weth),
             0.5 * 1e18,
             900 * 1e6, // minOut (with slippage and fees)
-            100 // 1% slippage
+            100, // 1% slippage
+            address(0)
         );
 
         // Verify repayment occurred
@@ -550,7 +558,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(dai),
             500 * 1e18,
             490 * 1e6, // minOut (with slippage)
-            100 // 1% slippage
+            100, // 1% slippage
+            address(0)
         );
 
         // Verify repayment occurred
@@ -607,7 +616,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(usdt),
             300 * 1e6,
             290 * 1e6,
-            100
+            100,
+            address(0)
         );
         vm.stopPrank();
 
@@ -621,7 +631,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(dai),
             400 * 1e18,
             390 * 1e6,
-            100
+            100,
+            address(0)
         );
         vm.stopPrank();
 
@@ -635,7 +646,8 @@ contract StoryProtocolIntegrationTest is Test {
             address(mockToken),
             300 * 1e18,
             290 * 1e6,
-            100
+            100,
+            address(0)
         );
         vm.stopPrank();
 

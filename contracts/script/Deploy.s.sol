@@ -193,23 +193,84 @@ contract DeployScript is Script {
         // Set conversion fee (10 bps = 0.1%)
         autoRepayEngine.setConversionFee(10);
         
-        // 10. Configure Mock Router Exchange Rates
-        console.log("Configuring router exchange rates...");
+        // 10. Configure Mock Router Exchange Rates - COMPREHENSIVE FIX
+        console.log("Configuring router exchange rates (COMPREHENSIVE)...");
         
-        // All rates are to USDC (repay token)
-        // Format: 1 tokenIn = X USDC (rate in 18 decimals)
+        // ===================================================================
+        // CRITICAL FIX: Configure ALL necessary swap paths
+        // ===================================================================
         
-        // Stablecoins: 1:1 with USDC
+        // --- MockRoyaltyToken to ALL supported assets (direct paths) ---
+        console.log("Setting MockRoyaltyToken -> Asset rates...");
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(usdc), 1e18);   // 1:1
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(usdt), 1e18);   // 1:1
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(dai), 1e18);    // 1:1
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(weth), 1e18);   // 1:1 for simplicity
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(wbtc), 1e18);   // 1:1 for simplicity
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(link), 1e18);   // 1:1 for simplicity
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(uni), 1e18);    // 1:1 for simplicity
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(aave), 1e18);   // 1:1 for simplicity
+        
+        // --- Cross-Stablecoin rates (bidirectional) ---
+        console.log("Setting stablecoin cross-rates...");
+        // USDC <-> USDT
+        mockRouter.setExchangeRate(address(usdc), address(usdt), 1e18);
         mockRouter.setExchangeRate(address(usdt), address(usdc), 1e18);
-        mockRouter.setExchangeRate(address(dai), address(usdc), 1e18);
-        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(usdc), 1e18);
         
-        // Volatile assets: based on oracle prices
+        // USDC <-> DAI
+        mockRouter.setExchangeRate(address(usdc), address(dai), 1e18);
+        mockRouter.setExchangeRate(address(dai), address(usdc), 1e18);
+        
+        // USDT <-> DAI
+        mockRouter.setExchangeRate(address(usdt), address(dai), 1e18);
+        mockRouter.setExchangeRate(address(dai), address(usdt), 1e18);
+        
+        // --- WETH as routing hub (for 3-hop swaps) ---
+        console.log("Setting WETH routing rates...");
+        
+        // MockRoyaltyToken <-> WETH
+        mockRouter.setExchangeRate(address(mockRoyaltyToken), address(weth), 1e15); // 1 MRT = 0.001 WETH
+        mockRouter.setExchangeRate(address(weth), address(mockRoyaltyToken), 1000e18); // 1 WETH = 1000 MRT
+        
+        // WETH -> Stablecoins (based on $3000 WETH price)
         mockRouter.setExchangeRate(address(weth), address(usdc), 3000e18);  // 1 WETH = 3000 USDC
+        mockRouter.setExchangeRate(address(weth), address(usdt), 3000e18);  // 1 WETH = 3000 USDT
+        mockRouter.setExchangeRate(address(weth), address(dai), 3000e18);   // 1 WETH = 3000 DAI
+        
+        // Stablecoins -> WETH (reverse) - FIXED: Use integer approximations
+        mockRouter.setExchangeRate(address(usdc), address(weth), 333333333333333);  // ~1/3000 WETH per USDC
+        mockRouter.setExchangeRate(address(usdt), address(weth), 333333333333333);  // ~1/3000 WETH per USDT
+        mockRouter.setExchangeRate(address(dai), address(weth), 333333333333333);   // ~1/3000 WETH per DAI
+        
+        // WETH <-> Other volatile assets
+        mockRouter.setExchangeRate(address(weth), address(wbtc), 50000000000000000);    // 0.05 WETH per WBTC
+        mockRouter.setExchangeRate(address(wbtc), address(weth), 20e18);                // 1 WBTC = 20 WETH
+        mockRouter.setExchangeRate(address(weth), address(link), 200e18);               // 1 WETH = 200 LINK
+        mockRouter.setExchangeRate(address(link), address(weth), 5000000000000000);     // 1 LINK = 0.005 WETH
+        mockRouter.setExchangeRate(address(weth), address(uni), 300e18);                // 1 WETH = 300 UNI
+        mockRouter.setExchangeRate(address(uni), address(weth), 3333333333333333);      // ~1/300 WETH per UNI
+        mockRouter.setExchangeRate(address(weth), address(aave), 30e18);                // 1 WETH = 30 AAVE
+        mockRouter.setExchangeRate(address(aave), address(weth), 33333333333333333);    // ~1/30 WETH per AAVE
+        
+        // --- Volatile assets to stablecoins (direct, for efficiency) ---
+        console.log("Setting volatile -> stablecoin rates...");
         mockRouter.setExchangeRate(address(wbtc), address(usdc), 60000e18); // 1 WBTC = 60000 USDC
+        mockRouter.setExchangeRate(address(wbtc), address(usdt), 60000e18); // 1 WBTC = 60000 USDT
+        mockRouter.setExchangeRate(address(wbtc), address(dai), 60000e18);  // 1 WBTC = 60000 DAI
+        
         mockRouter.setExchangeRate(address(link), address(usdc), 15e18);    // 1 LINK = 15 USDC
+        mockRouter.setExchangeRate(address(link), address(usdt), 15e18);    // 1 LINK = 15 USDT
+        mockRouter.setExchangeRate(address(link), address(dai), 15e18);     // 1 LINK = 15 DAI
+        
         mockRouter.setExchangeRate(address(uni), address(usdc), 10e18);     // 1 UNI = 10 USDC
+        mockRouter.setExchangeRate(address(uni), address(usdt), 10e18);     // 1 UNI = 10 USDT
+        mockRouter.setExchangeRate(address(uni), address(dai), 10e18);      // 1 UNI = 10 DAI
+        
         mockRouter.setExchangeRate(address(aave), address(usdc), 100e18);   // 1 AAVE = 100 USDC
+        mockRouter.setExchangeRate(address(aave), address(usdt), 100e18);   // 1 AAVE = 100 USDT
+        mockRouter.setExchangeRate(address(aave), address(dai), 100e18);    // 1 AAVE = 100 DAI
+        
+        console.log("Exchange rates configured - ALL swap paths enabled!");
         
         // Set slippage to 0.5%
         mockRouter.setSimulatedSlippage(50);
@@ -353,6 +414,7 @@ contract DeployScript is Script {
         console.log("MULTI-ASSET SUPPORT:");
         console.log("  Supported Assets:   8 tokens (USDC, USDT, DAI, WETH, WBTC, LINK, UNI, AAVE)");
         console.log("  Auto-Repay Mode:    Scans ALL assets to find user debt");
+        console.log("  Swap Paths:         FULLY CONFIGURED - All token pairs supported!");
         console.log("");
         console.log("MOCKS:");
         console.log("  MockRoyaltyToken:  ", address(mockRoyaltyToken));
@@ -360,6 +422,15 @@ contract DeployScript is Script {
         console.log("  MockRoyaltyVault:  ", address(mockRoyaltyVault));
         console.log("  MockRoyaltyModule: ", address(mockRoyaltyModule));
         console.log("  MockRouter:        ", address(mockRouter));
+        console.log("=================================================");
+        console.log("");
+        console.log("FIXES APPLIED:");
+        console.log("  - Fixed division errors: Using integer approximations");
+        console.log("  - MockRoyaltyToken -> ALL assets (direct paths)");
+        console.log("  - Cross-stablecoin rates (USDC/USDT/DAI bidirectional)");
+        console.log("  - WETH routing hub for 3-hop swaps");
+        console.log("  - Volatile assets -> stablecoins (direct paths)");
+        console.log("  - ALL swap combinations now supported!");
         console.log("=================================================");
         console.log("");
 

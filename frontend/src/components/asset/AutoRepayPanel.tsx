@@ -129,19 +129,34 @@ export const AutoRepayPanel: React.FC<AutoRepayPanelProps> = ({
                 ipaId,
                 CONTRACTS.MockRoyaltyToken.address as string,
                 mockTokenBalance.balance, // Use MOCK balance
-                '0' // Min out (0 for dev/testnet)
+                '0', // Min out (0 for dev/testnet)
+                50, // Slippage
+                _assetAddress // Preferred debt asset (use the one from props)
             );
 
             // Step 3: Success!
             setSuccess('✅ Auto-repay complete! Debt has been reduced.');
 
-            // Refresh balances
+            // Refresh balances locally
             setTokenBalances(prev => prev.map(tb =>
                 tb.token.symbol === 'MOCK' ? { ...tb, balance: '0', balanceRaw: 0n } : tb
             ));
 
-            // Notify parent to refresh data
+            // Notify parent to refresh data with delay to ensure node indexing
+            // Immediate refresh
             onRepayComplete();
+
+            // Delayed refresh (1s)
+            setTimeout(() => {
+                console.log('Triggering delayed refresh (1s)...');
+                onRepayComplete();
+            }, 1000);
+
+            // Backup refresh (3s)
+            setTimeout(() => {
+                console.log('Triggering backup refresh (3s)...');
+                onRepayComplete();
+            }, 3000);
 
             setTimeout(() => setSuccess(''), 5000);
         } catch (err: any) {
@@ -234,7 +249,7 @@ export const AutoRepayPanel: React.FC<AutoRepayPanelProps> = ({
 
                                 <div>
                                     <p className="text-xs text-gray-500 uppercase mb-2">Royalty Balances</p>
-                                    <div className="grid grid-cols-3 gap-2 mb-3">
+                                    <div className="grid grid-cols-1 gap-2 mb-3">
                                         {tokenBalances.map(({ token, balance, balanceRaw }) => {
                                             const hasBalance = balanceRaw > 0n;
                                             return (

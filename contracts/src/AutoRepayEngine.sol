@@ -183,12 +183,12 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
     function addSupportedAsset(address asset) external onlyOwner {
         require(asset != address(0), "Invalid asset");
         supportedAssets.push(asset);
-        
+
         // Approve lending pool to spend this asset for repayments
         if (address(lendingPool) != address(0)) {
             IERC20(asset).forceApprove(address(lendingPool), type(uint256).max);
         }
-        
+
         emit SupportedAssetAdded(asset);
     }
 
@@ -290,7 +290,8 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
         address claimedToken,
         uint256 claimedAmount,
         uint256 minRepayOut,
-        uint16 slippageBps
+        uint16 slippageBps,
+        address preferredDebtAsset
     ) external nonReentrant returns (uint256) {
         require(slippageBps <= MAX_SLIPPAGE_BPS, "Slippage too high");
 
@@ -306,22 +307,32 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
         // If no vault debt, scan LendingPool for borrowed assets
         address debtAsset = address(0);
         uint256 debtAmount = 0;
-        
+
         if (!hasVaultDebt && address(lendingPool) != address(0)) {
-            // Scan all supported assets to find user's debt
-            for (uint i = 0; i < supportedAssets.length; i++) {
-                ILendingPool.UserPosition memory lpPos = lendingPool.getUserPosition(
-                    owner, 
-                    supportedAssets[i]
-                );
-                
+            // If preferred asset is specified, check it first
+            if (preferredDebtAsset != address(0)) {
+                ILendingPool.UserPosition memory lpPos = lendingPool
+                    .getUserPosition(owner, preferredDebtAsset);
                 if (lpPos.borrowed > 0) {
-                    debtAsset = supportedAssets[i];
+                    debtAsset = preferredDebtAsset;
                     debtAmount = lpPos.borrowed;
-                    break; // Use first found debt asset
                 }
             }
-            
+
+            // If no preferred asset or it has no debt, scan all supported assets
+            if (debtAsset == address(0)) {
+                for (uint i = 0; i < supportedAssets.length; i++) {
+                    ILendingPool.UserPosition memory lpPos = lendingPool
+                        .getUserPosition(owner, supportedAssets[i]);
+
+                    if (lpPos.borrowed > 0) {
+                        debtAsset = supportedAssets[i];
+                        debtAmount = lpPos.borrowed;
+                        break; // Use first found debt asset
+                    }
+                }
+            }
+
             if (debtAsset == address(0)) {
                 revert Errors.NoActiveDebt();
             }
@@ -378,16 +389,22 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
         // Execute repayment to appropriate system
         if (hasVaultDebt) {
             // Repay to AutonomyVault
-            
+
             // Cap repay amount to debt
             if (repayAmount > vaultPos.debtAmount) {
                 repayAmount = vaultPos.debtAmount;
             }
 
             vault.reduceDebt(owner, repayAmount);
-            
-            IAutonomyVault.Position memory updatedPos = vault.getPosition(owner);
-            emit RoyaltyRepaySucceeded(owner, repayAmount, updatedPos.debtAmount);
+
+            IAutonomyVault.Position memory updatedPos = vault.getPosition(
+                owner
+            );
+            emit RoyaltyRepaySucceeded(
+                owner,
+                repayAmount,
+                updatedPos.debtAmount
+            );
 
             if (updatedPos.debtAmount == 0) {
                 emit IPReleased(owner, address(uint160(uint256(ipaId))));
@@ -396,7 +413,7 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
             return repayAmount;
         } else {
             // Repay to LendingPool
-            
+
             // Cap repay amount to debt
             if (repayAmount > debtAmount) {
                 repayAmount = debtAmount;
@@ -600,7 +617,9 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
 
         vault.reduceDebt(user, repayAmount);
 
-        IAutonomyVault.Position memory updatedPosition = vault.getPosition(user);
+        IAutonomyVault.Position memory updatedPosition = vault.getPosition(
+            user
+        );
 
         emit AutoRepayExecuted(user, repayAmount, updatedPosition.debtAmount);
 

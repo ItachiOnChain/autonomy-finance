@@ -312,7 +312,8 @@ export function useStoryProtocol() {
         tokenIn: string,
         amountIn: string,
         minRepayOut: string = '0',
-        slippageBps: number = 50 // 0.5%
+        slippageBps: number = 50, // 0.5%
+        preferredDebtAsset: string = '0x0000000000000000000000000000000000000000'
     ) => {
         if (!address || !walletClient || !publicClient) throw new Error('Wallet not connected');
 
@@ -324,7 +325,7 @@ export function useStoryProtocol() {
             const amountWei = parseEther(amountIn);
             const minOutWei = parseEther(minRepayOut);
 
-            console.log('Initiating auto-repay:', { ipaId, tokenIn, amountIn });
+            console.log('Initiating auto-repay:', { ipaId, tokenIn, amountIn, preferredDebtAsset });
 
             // 1. Check allowance for AutoRepayEngine
             const allowance = await publicClient.readContract({
@@ -357,7 +358,8 @@ export function useStoryProtocol() {
                     tokenIn,
                     amountWei,
                     minOutWei,
-                    slippageBps
+                    slippageBps,
+                    preferredDebtAsset as Address
                 ],
             });
 

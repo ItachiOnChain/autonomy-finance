@@ -9,10 +9,28 @@ interface IAutoRepayEngine {
         uint256 remainingDebt;
         bool willReleaseIP;
     }
-    
-    event AutoRepayExecuted(address indexed user, uint256 amount, uint256 remainingDebt);
+
+    event AutoRepayExecuted(
+        address indexed user,
+        uint256 amount,
+        uint256 remainingDebt
+    );
     event IPReleased(address indexed user, address indexed ipAsset);
-    
-    function simulateAutoRepay(address user) external view returns (RepaymentSimulation memory);
-    function executeAutoRepay(address user) external returns (uint256 repaidAmount);
+
+    function simulateAutoRepay(
+        address user
+    ) external view returns (RepaymentSimulation memory);
+
+    function executeAutoRepay(
+        address user
+    ) external returns (uint256 repaidAmount);
+
+    function autoRepayFromRoyalty(
+        bytes32 ipaId,
+        address claimedToken,
+        uint256 claimedAmount,
+        uint256 minRepayOut,
+        uint16 slippageBps,
+        address preferredDebtAsset
+    ) external returns (uint256);
 }
