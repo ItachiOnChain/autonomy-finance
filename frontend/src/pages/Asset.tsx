@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAccount, useWaitForTransactionReceipt, usePublicClient } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
+import { 
+  useAccount, 
+  useWaitForTransactionReceipt, 
+  usePublicClient 
+} from 'wagmi';
+import { parseUnits } from 'viem';
 import { getAssetBySymbol } from '../config/assets';
 import {
-    useAssetData,
-    useUserPosition,
-    useLendingPool,
-    useUserHealthFactor,
-    useTokenBalance,
-    useTokenAllowance
+  useAssetData,
+  useUserPosition,
+  useLendingPool,
+  useUserHealthFactor,
+  useTokenBalance,
+  useTokenAllowance
 } from '../hooks/useLendingPool';
 import { CONTRACTS } from '../config/contracts';
 
@@ -23,262 +27,313 @@ import { MintPanel } from '../components/asset/MintPanel';
 import { AssetActions } from '../components/asset/AssetActions';
 import { AutoRepayPanel } from '../components/asset/AutoRepayPanel';
 
+// ================================
+// CLEAN GLASS PANEL WRAPPER
+// ================================
+const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="
+    rounded-2xl
+    bg-black/30
+    backdrop-blur-xl
+    shadow-[0_0_24px_rgba(138,224,108,0.05)]
+    p-0
+  ">
+    {children}
+  </div>
+);
+
 export const Asset: React.FC = () => {
-    const { symbol } = useParams<{ symbol: string }>();
-    const navigate = useNavigate();
-    const { isConnected } = useAccount();
-    const asset = getAssetBySymbol(symbol || '');
+  const { symbol } = useParams<{ symbol: string }>();
+  const navigate = useNavigate();
+  const { isConnected } = useAccount();
+  const asset = getAssetBySymbol(symbol || '');
 
-    const [supplyAmount, setSupplyAmount] = useState('');
-    const [borrowAmount, setBorrowAmount] = useState('');
-    const [withdrawAmount, setWithdrawAmount] = useState('');
-    const [repayAmount, setRepayAmount] = useState('');
-    const [mintAmount, setMintAmount] = useState('1000');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | undefined>();
+  // State management
+  const [supplyAmount, setSupplyAmount] = useState('');
+  const [borrowAmount, setBorrowAmount] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [repayAmount, setRepayAmount] = useState('');
+  const [mintAmount, setMintAmount] = useState('1000');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | undefined>();
 
-    // Wait for transaction confirmation
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-        hash: pendingTxHash,
-    });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: pendingTxHash,
+  });
 
-    if (!asset) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Asset Not Found</h1>
-                    <button onClick={() => navigate('/core')} className="text-blue-600 hover:underline">
-                        ← Back to Core
-                    </button>
-                </div>
-            </div>
-        );
+  // Asset not found
+  if (!asset) {
+    return (
+      <div className="min-h-screen w-full text-white bg-black">
+        <div className="max-w-2xl mx-auto p-8 mt-24 text-center">
+          <div className="bg-black/40 rounded-2xl p-8 border border-[#8AE06C]/20 backdrop-blur-xl">
+            <h1 className="text-2xl font-mono font-bold mb-4">Asset Not Found</h1>
+            <p className="text-white/60 mb-6">We couldn't find that asset.</p>
+            <button
+              onClick={() => navigate('/core')}
+              className="px-4 py-2 rounded-md bg-[#8AE06C] text-black font-medium"
+            >
+              ← Back to Core
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Contract address
+  // @ts-ignore
+  const assetAddress = (CONTRACTS as any)[asset.symbol]?.address as string;
+
+  // Custom hooks
+  const {
+    totalSupplied,
+    totalBorrowed,
+    availableLiquidity,
+    utilizationRate,
+    supplyAPR,
+    borrowAPR,
+    refetch: refetchAssetData
+  } = useAssetData(assetAddress);
+
+  const { supplied, borrowed, refetch: refetchPosition } = useUserPosition(assetAddress);
+  const { balance, refetch: refetchBalance } = useTokenBalance(assetAddress);
+  const { allowance, refetch: refetchAllowance } = useTokenAllowance(assetAddress);
+  const { supply, withdraw, borrow, repay, approve, mint, isPending } = useLendingPool();
+  const { healthFactor, refetch: refetchHealthFactor } = useUserHealthFactor();
+
+  const publicClient = usePublicClient();
+
+  // Effects
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError('');
+        setSuccess('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
+
+  useEffect(() => {
+    if (isConfirmed && pendingTxHash) {
+      Promise.all([
+        refetchBalance(),
+        refetchPosition(),
+        refetchAllowance(),
+        refetchAssetData(),
+        refetchHealthFactor(),
+      ]);
+      setSupplyAmount('');
+      setWithdrawAmount('');
+      setBorrowAmount('');
+      setRepayAmount('');
+      setSuccess('Transaction confirmed');
+      setPendingTxHash(undefined);
+    }
+  }, [isConfirmed]);
+
+  // Transaction handlers
+  const handleTransaction = async (
+    action: string,
+    fn: () => Promise<`0x${string}` | undefined>,
+    amount: string
+  ) => {
+    try {
+      const hash = await fn();
+      if (hash) {
+        setPendingTxHash(hash);
+        setSuccess(`⏳ ${action} ${amount} ${asset.symbol}... waiting`);
+      }
+    } catch (err: any) {
+      setError(`Error: ${err.shortMessage || err.message}`);
+    }
+  };
+
+  const handleMint = () => 
+    handleTransaction('Mint', () => mint(assetAddress, mintAmount, asset.decimals), mintAmount);
+
+  const handleApprove = (amt: string) =>
+    handleTransaction('Approve', () => approve(assetAddress, amt, asset.decimals), amt);
+
+  const handleSupply = async (amount: string) => {
+    const amountWei = parseUnits(amount, asset.decimals);
+
+    if (balance < amountWei) {
+      setError(`Insufficient balance`);
+      return;
     }
 
-    // Safe access to contract address
-    // @ts-ignore
-    const assetAddress = (CONTRACTS as any)[asset.symbol]?.address as string;
+    // Approval if needed
+    if (allowance < amountWei) {
+      const approveHash = await approve(assetAddress, amount, asset.decimals);
+      if (approveHash) {
+        await publicClient?.waitForTransactionReceipt({ hash: approveHash });
+        await refetchAllowance();
+      }
+    }
 
-    const { totalSupplied, totalBorrowed, availableLiquidity, utilizationRate, supplyAPR, borrowAPR, refetch: refetchAssetData } = useAssetData(assetAddress);
-    const { supplied, borrowed, refetch: refetchPosition } = useUserPosition(assetAddress);
-    const { balance, refetch: refetchBalance } = useTokenBalance(assetAddress);
-    const { allowance, refetch: refetchAllowance } = useTokenAllowance(assetAddress);
-    const { supply, withdraw, borrow, repay, approve, mint, isPending } = useLendingPool();
-    const { healthFactor, refetch: refetchHealthFactor } = useUserHealthFactor();
+    handleTransaction('Supply', () => supply(assetAddress, amount, asset.decimals), amount);
+  };
 
-    // Auto-clear messages
-    useEffect(() => {
-        if (error || success) {
-            const timer = setTimeout(() => {
-                setError('');
-                setSuccess('');
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [error, success]);
+  const handleWithdraw = (amount: string) =>
+    handleTransaction('Withdraw', () => withdraw(assetAddress, amount, asset.decimals), amount);
 
-    // Refetch data when transaction is confirmed
-    useEffect(() => {
-        if (isConfirmed && pendingTxHash) {
-            // Refetch all data to ensure UI updates
-            Promise.all([
-                refetchBalance(),
-                refetchPosition(),
-                refetchAllowance(),
-                refetchAssetData(),
-                refetchHealthFactor(),
-            ]).catch(err => console.error('Error refetching data:', err));
+  const handleBorrow = (amount: string) =>
+    handleTransaction('Borrow', () => borrow(assetAddress, amount, asset.decimals), amount);
 
-            // Clear input fields after successful transaction
-            setSupplyAmount('');
-            setWithdrawAmount('');
-            setBorrowAmount('');
-            setRepayAmount('');
-            setSuccess('✅ Transaction confirmed!');
-            setPendingTxHash(undefined);
-        }
-    }, [isConfirmed, pendingTxHash, refetchBalance, refetchPosition, refetchAllowance, refetchAssetData, refetchHealthFactor]);
+  const handleRepay = (amount: string) =>
+    handleTransaction('Repay', () => repay(assetAddress, amount, asset.decimals), amount);
 
-    const handleTransaction = async (
-        actionName: string,
-        actionFn: () => Promise<`0x${string}` | undefined>,
-        amount: string
-    ) => {
-        if (!amount || parseFloat(amount) <= 0) return;
-        setError('');
-        setSuccess('');
-        try {
-            const hash = await actionFn();
-            if (hash) {
-                setPendingTxHash(hash);
-                setSuccess(`⏳ ${actionName} ${amount} ${asset.symbol}... waiting for confirmation`);
-                // Don't clear input here - wait for confirmation
-            }
-        } catch (err: any) {
-            console.error(`${actionName} error:`, err);
-            setError(`❌ ${actionName} failed: ${err.shortMessage || err.message || 'Unknown error'}`);
-        }
-    };
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchBalance(),
+      refetchPosition(),
+      refetchAllowance(),
+      refetchAssetData(),
+      refetchHealthFactor()
+    ]);
+  };
 
-    const handleMint = () => handleTransaction('Minting', () => mint(assetAddress, mintAmount, asset.decimals), mintAmount);
+  const isProcessing = isPending || isConfirming;
 
-    const handleApprove = (amount: string) => handleTransaction('Approving', () => approve(assetAddress, amount, asset.decimals), amount);
-
-    const publicClient = usePublicClient();
-
-    const handleSupply = async (amount: string) => {
-        if (!amount || parseFloat(amount) <= 0) return;
-        const amountWei = parseUnits(amount, asset.decimals);
-
-        if (balance < amountWei) {
-            setError(`❌ Insufficient balance. You have ${formatUnits(balance, asset.decimals)} ${asset.symbol}`);
-            return;
-        }
-
-        setError('');
-        setSuccess('');
-
-        try {
-            // Step 1: Approve if needed
-            if (allowance < amountWei) {
-                const approveHash = await approve(assetAddress, amount, asset.decimals);
-                if (approveHash) {
-                    setPendingTxHash(approveHash);
-                    setSuccess(`⏳ Approving ${amount} ${asset.symbol}...`);
-
-                    if (!publicClient) throw new Error('Public client not available');
-                    await publicClient.waitForTransactionReceipt({ hash: approveHash });
-
-                    setSuccess(`✅ Approved! Now supplying...`);
-                    // Small delay to ensure node indexing
-                    await new Promise(r => setTimeout(r, 1000));
-                    await refetchAllowance();
-                }
-            }
-
-            // Step 2: Supply
-            const supplyHash = await supply(assetAddress, amount, asset.decimals);
-            if (supplyHash) {
-                setPendingTxHash(supplyHash);
-                setSuccess(`⏳ Supplying ${amount} ${asset.symbol}... waiting for confirmation`);
-            }
-        } catch (err: any) {
-            console.error('Supply error:', err);
-            setError(`❌ Supply failed: ${err.shortMessage || err.message || 'Unknown error'}`);
-            setPendingTxHash(undefined);
-        }
-    };
-
-    const handleWithdraw = (amount: string) => handleTransaction('Withdrawing', () => withdraw(assetAddress, amount, asset.decimals), amount);
-
-    const handleBorrow = (amount: string) => handleTransaction('Borrowing', () => borrow(assetAddress, amount, asset.decimals), amount);
-
-    const handleRepay = (amount: string) => handleTransaction('Repaying', () => repay(assetAddress, amount, asset.decimals), amount);
-
-    const isProcessing = isPending || isConfirming;
-
-    const handleRefresh = async () => {
-        await Promise.all([
-            refetchBalance(),
-            refetchPosition(),
-            refetchAllowance(),
-            refetchAssetData(),
-            refetchHealthFactor(),
-        ]);
-    };
-
-    return (
-        <div className="min-h-screen bg-white">
+  return (
+    <div
+      className="min-h-screen w-full text-white"
+      style={{
+        backgroundColor: "#02060b",
+        backgroundImage: `
+          linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px)
+        `,
+        backgroundSize: "50px 50px"
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <Panel>
+          <div className="p-4">
             <AssetHeader asset={asset} onRefresh={handleRefresh} />
+          </div>
+        </Panel>
 
-            {/* Error/Success Messages */}
-            {(error || success) && (
-                <div className="max-w-7xl mx-auto px-4 pt-4">
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-                            {error}
-                        </div>
-                    )}
-                    {success && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 flex items-center gap-2">
-                            {isConfirming && <span className="animate-spin">⏳</span>}
-                            {success}
-                            {isConfirmed && ' ✅ Confirmed!'}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Reserve Status */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <ReserveOverview
-                            asset={asset}
-                            data={{ totalSupplied, totalBorrowed, availableLiquidity, utilizationRate }}
-                        />
-                        <InterestRates
-                            asset={asset}
-                            rates={{ supplyAPR, borrowAPR }}
-                        />
-                        <AssetInfo asset={asset} />
-                    </div>
-
-                    {/* Right Column - Actions */}
-                    <div className="space-y-6">
-                        <UserPosition
-                            asset={asset}
-                            position={{ balance, supplied, borrowed, healthFactor }}
-                            isConnected={isConnected}
-                        />
-
-                        <MintPanel
-                            asset={asset}
-                            mintAmount={mintAmount}
-                            setMintAmount={setMintAmount}
-                            onMint={handleMint}
-                            isProcessing={isProcessing}
-                            isConnected={isConnected}
-                        />
-
-                        <AssetActions
-                            asset={asset}
-                            isConnected={isConnected}
-                            isProcessing={isProcessing}
-                            userPosition={{ supplied, borrowed }}
-                            allowance={allowance}
-                            actions={{
-                                onSupply: handleSupply,
-                                onWithdraw: handleWithdraw,
-                                onBorrow: handleBorrow,
-                                onRepay: handleRepay,
-                                onApprove: handleApprove
-                            }}
-                            amounts={{
-                                supply: supplyAmount,
-                                withdraw: withdrawAmount,
-                                borrow: borrowAmount,
-                                repay: repayAmount
-                            }}
-                            setAmounts={{
-                                setSupply: setSupplyAmount,
-                                setWithdraw: setWithdrawAmount,
-                                setBorrow: setBorrowAmount,
-                                setRepay: setRepayAmount
-                            }}
-                        />
-
-                        <AutoRepayPanel
-                            asset={asset}
-                            assetAddress={assetAddress}
-                            userBorrowed={borrowed}
-                            onRepayComplete={handleRefresh}
-                        />
-                    </div>
-                </div>
+        {/* Notifications */}
+        <div className="space-y-3">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-300 font-mono text-sm">
+              {error}
             </div>
+          )}
+          {success && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-green-300 font-mono text-sm">
+              {success} {isConfirming && '⏳'}
+            </div>
+          )}
         </div>
-    );
-};
 
+        {/* Main 3-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* LEFT 2 COLS - Info & Actions */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Reserve Overview - Full Width */}
+            <Panel>
+              <div className="p-6">
+                <ReserveOverview
+                  asset={asset}
+                  data={{ totalSupplied, totalBorrowed, availableLiquidity, utilizationRate }}
+                />
+              </div>
+            </Panel>
+
+            {/* Interest Rates + Asset Info - Side by Side (TOP ROW) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Panel>
+                <div className="p-6">
+                  <InterestRates asset={asset} rates={{ supplyAPR, borrowAPR }} />
+                </div>
+              </Panel>
+
+              <Panel>
+                <div className="p-6">
+                  <AssetInfo asset={asset} />
+                </div>
+              </Panel>
+            </div>
+
+            {/* Supply + AutoRepay - Side by Side (BOTTOM ROW) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Panel>
+                <div className="p-6">
+                  <AssetActions
+                    asset={asset}
+                    isConnected={isConnected}
+                    isProcessing={isProcessing}
+                    userPosition={{ supplied, borrowed }}
+                    allowance={allowance}
+                    actions={{
+                      onSupply: handleSupply,
+                      onWithdraw: handleWithdraw,
+                      onBorrow: handleBorrow,
+                      onRepay: handleRepay,
+                      onApprove: handleApprove
+                    }}
+                    amounts={{
+                      supply: supplyAmount,
+                      withdraw: withdrawAmount,
+                      borrow: borrowAmount,
+                      repay: repayAmount
+                    }}
+                    setAmounts={{
+                      setSupply: setSupplyAmount,
+                      setWithdraw: setWithdrawAmount,
+                      setBorrow: setBorrowAmount,
+                      setRepay: setRepayAmount
+                    }}
+                  />
+                </div>
+              </Panel>
+
+              <Panel>
+                <div className="p-6">
+                  <AutoRepayPanel
+                    asset={asset}
+                    assetAddress={assetAddress}
+                    userBorrowed={borrowed}
+                    onRepayComplete={handleRefresh}
+                  />
+                </div>
+              </Panel>
+            </div>
+          </div>
+
+          {/* RIGHT 1 COL - Position & Mint */}
+          <div className="space-y-8">
+            <Panel>
+              <div className="p-6">
+                <UserPosition
+                  asset={asset}
+                  position={{ balance, supplied, borrowed, healthFactor }}
+                  isConnected={isConnected}
+                />
+              </div>
+            </Panel>
+
+            <Panel>
+              <div className="p-6">
+                <MintPanel
+                  asset={asset}
+                  mintAmount={mintAmount}
+                  setMintAmount={setMintAmount}
+                  onMint={handleMint}
+                  isProcessing={isProcessing}
+                  isConnected={isConnected}
+                />
+              </div>
+            </Panel>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

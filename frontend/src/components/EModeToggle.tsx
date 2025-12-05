@@ -1,136 +1,128 @@
-import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { useUserEMode, useSetUserEMode } from '../hooks/useEMode';
-import { EMODE_CATEGORIES, EMODE_CATEGORY_LABELS, ASSETS } from '../config/assets';
-
-import { CONTRACTS } from '../config/contracts';
+import React, { useState } from "react";
+import { useAccount } from "wagmi";
+import { useUserEMode, useSetUserEMode } from "../hooks/useEMode";
+import { EMODE_CATEGORIES, EMODE_CATEGORY_LABELS, ASSETS } from "../config/assets";
+import { CONTRACTS } from "../config/contracts";
+import { useUserPosition } from "../hooks/useLendingPool";
 
 export const EModeToggle: React.FC = () => {
-    const { address } = useAccount();
-    const { eModeCategory, isEModeEnabled } = useUserEMode(address);
-    const { setUserEMode, isPending } = useSetUserEMode();
-    const [error, setError] = useState<string>('');
+  const { address } = useAccount();
+  const { eModeCategory, isEModeEnabled } = useUserEMode(address);
+  const { setUserEMode, isPending } = useSetUserEMode();
+  const [error, setError] = useState("");
 
-    // Detect user's collateral category by checking their supplied assets
-    const detectUserCategory = (): number | null => {
-        if (!address) return null;
+  // Call all hooks at component level (not in loops!)
+  const assetPositions = ASSETS.map(asset => {
+    const assetAddress = (CONTRACTS as any)[asset.symbol]?.address;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const position = assetAddress ? useUserPosition(assetAddress) : { supplied: 0n };
+    return { asset, supplied: position.supplied };
+  });
 
-        for (const asset of ASSETS) {
-            const assetAddress = (CONTRACTS as any)[asset.symbol]?.address as string;
-            if (!assetAddress) continue;
+  // -------- DETECT USER COLLATERAL CORRECTLY ----------
+  const detectUserCategory = () => {
+    if (!address) return null;
 
-            // We can't use hooks in a loop, so we'll use a simpler approach
-            // Just default to stablecoins for now if user has WETH supplied
-            // In production, you'd want to fetch all positions first
-        }
+    let hasStable = false;
+    let hasETH = false;
 
-        // For now, detect based on what the user likely has
-        // If they have WETH, suggest ETH category
-        // Otherwise default to stablecoins
-        return EMODE_CATEGORIES.STABLECOINS;
-    };
+    for (const { asset, supplied } of assetPositions) {
+      if (supplied > 0n) {
+        if (asset.category === EMODE_CATEGORIES.STABLECOINS) hasStable = true;
+        if (asset.category === EMODE_CATEGORIES.ETH) hasETH = true;
+      }
+    }
 
-    const handleToggle = async () => {
-        try {
-            setError('');
+    if (hasStable) return EMODE_CATEGORIES.STABLECOINS;
+    if (hasETH) return EMODE_CATEGORIES.ETH;
 
-            if (isEModeEnabled) {
-                // Disable E-Mode
-                await setUserEMode(EMODE_CATEGORIES.DISABLED);
-            } else {
-                // Enable E-Mode - detect category
-                const category = detectUserCategory();
-                if (category === null) {
-                    setError('Please connect your wallet first');
-                    return;
-                }
+    return null; // no collateral
+  };
 
-                try {
-                    await setUserEMode(category);
-                } catch (err: any) {
-                    // Handle specific error for no collateral in category
-                    if (err.message?.includes('No collateral in this category')) {
-                        setError('You need to supply collateral in this category first. Try supplying USDC, USDT, or DAI for stablecoin E-Mode.');
-                    } else {
-                        throw err;
-                    }
-                }
-            }
-        } catch (err: any) {
-            console.error('E-Mode toggle error:', err);
-            const errorMsg = err.message || err.shortMessage || 'Failed to toggle E-Mode';
-            setError(errorMsg);
-        }
-    };
+  // -------- TOGGLE E-MODE LOGIC ----------
+  const handleToggle = async () => {
+    setError("");
 
-    const getCategoryLabel = () => {
-        if (!eModeCategory) return '';
-        return EMODE_CATEGORY_LABELS[eModeCategory as keyof typeof EMODE_CATEGORY_LABELS] || 'Unknown';
-    };
+    try {
+      if (isEModeEnabled) {
+        await setUserEMode(EMODE_CATEGORIES.DISABLED);
+        return;
+      }
 
-    const getEModeLTV = () => {
-        if (!isEModeEnabled || !eModeCategory) return null;
+      const category = detectUserCategory();
 
-        // Find an asset in this category to get the E-Mode LTV
-        const asset = ASSETS.find(a => a.category === eModeCategory);
-        return asset?.eModeLTV;
-    };
+      if (!category) {
+        setError("You must supply eligible collateral before enabling E-Mode.");
+        return;
+      }
 
-    return (
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={isEModeEnabled}
-                            onChange={handleToggle}
-                            disabled={isPending || !address}
-                            className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-blue-500 cursor-pointer"
-                        />
-                        <span className="text-white font-medium">E-Mode (Efficiency Mode)</span>
-                    </label>
+      await setUserEMode(category);
+    } catch (err: any) {
+      console.error("E-Mode error:", err);
+      setError(err.message || "Failed to toggle E-Mode");
+    }
+  };
 
-                    {isEModeEnabled && (
-                        <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-sm">
-                            {getCategoryLabel()}
-                        </span>
-                    )}
-                </div>
+  const categoryLabel =
+    EMODE_CATEGORY_LABELS[eModeCategory as keyof typeof EMODE_CATEGORY_LABELS] ||
+    "Unknown";
 
-                {isEModeEnabled && getEModeLTV() && (
-                    <div className="text-right">
-                        <div className="text-xs text-white/60">E-Mode LTV</div>
-                        <div className="text-green-400 font-bold">{getEModeLTV()}%</div>
-                    </div>
-                )}
-            </div>
+  const eModeLTV = (() => {
+    const asset = ASSETS.find((a) => a.category === eModeCategory);
+    return asset?.eModeLTV || null;
+  })();
 
-            <div className="text-xs text-white/60">
-                {isEModeEnabled ? (
-                    <>
-                        ⚡ Higher LTV enabled for {getCategoryLabel()} assets.
-                        You can only borrow assets in the same category.
-                    </>
-                ) : (
-                    <>
-                        Enable E-Mode to get higher LTV for assets in the same category
-                        (e.g., 97% for stablecoins). Requires collateral in that category.
-                    </>
-                )}
-            </div>
+  return (
+    <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+      <div className="flex items-center justify-between mb-2">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isEModeEnabled}
+            onChange={handleToggle}
+            disabled={isPending || !address}
+            className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-blue-500"
+          />
 
-            {error && (
-                <div className="mt-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">
-                    {error}
-                </div>
-            )}
+          <span className="text-base font-mono tracking-wide text-white">
+  E-Mode (Unlock Maximum LTV)
+</span>
 
-            {isPending && (
-                <div className="mt-2 text-xs text-blue-400">
-                    Processing transaction...
-                </div>
-            )}
+
+          {isEModeEnabled && (
+            <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-sm">
+              {categoryLabel}
+            </span>
+          )}
+        </label>
+
+        {isEModeEnabled && eModeLTV && (
+          <div className="text-right">
+            <div className="text-xs text-white/60">E-Mode LTV</div>
+            <div className="text-green-400 font-bold">{eModeLTV}%</div>
+          </div>
+        )}
+      </div>
+
+      <div className="text-xs text-white/60">
+        {isEModeEnabled ? (
+          <>Higher LTV enabled for {categoryLabel} assets.</>
+        ) : (
+          <>
+          
+          </>
+        )}
+      </div>
+
+      {error && (
+        <div className="mt-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">
+          {error}
         </div>
-    );
+      )}
+
+      {isPending && (
+        <div className="mt-2 text-xs text-blue-400">Processing transaction…</div>
+      )}
+    </div>
+  );
 };

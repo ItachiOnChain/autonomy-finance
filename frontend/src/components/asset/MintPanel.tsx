@@ -1,9 +1,7 @@
 import React from 'react';
 
 interface MintPanelProps {
-    asset: {
-        symbol: string;
-    };
+    asset: { symbol: string };
     mintAmount: string;
     setMintAmount: (amount: string) => void;
     onMint: () => void;
@@ -22,9 +20,21 @@ export const MintPanel: React.FC<MintPanelProps> = ({
     if (!isConnected) return null;
 
     return (
-        <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-            <h3 className="font-bold text-gray-900 mb-2">🪙 Mint Test Tokens</h3>
-            <p className="text-xs text-gray-600 mb-4">Dev only - mint tokens for testing</p>
+        <div
+            className="
+                bg-black/40 
+                border border-white/10 
+                rounded-2xl 
+                p-6 
+                backdrop-blur-xl
+                font-mono
+                shadow-[0_0_20px_rgba(138,224,108,0.12)]
+            "
+        >
+            <h3 className="text-sm text-white/60 tracking-[0.25em] uppercase mb-2">
+                Mint Test Tokens
+            </h3>
+            <p className="text-xs text-white/40 mb-4">Dev-only minting for testing</p>
 
             <div className="space-y-3">
                 <input
@@ -32,13 +42,34 @@ export const MintPanel: React.FC<MintPanelProps> = ({
                     placeholder="1000"
                     value={mintAmount}
                     onChange={(e) => setMintAmount(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={isProcessing}
+                    className="
+                        w-full px-4 py-3 
+                        bg-black/60 
+                        border border-white/15 
+                        rounded-lg 
+                        text-white
+                        placeholder-white/30
+                        focus:border-[#8AE06C] 
+                        focus:ring-0
+                        font-mono
+                    "
                 />
+
                 <button
                     onClick={onMint}
                     disabled={isProcessing || !mintAmount}
-                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+                    className="
+                        w-full px-4 py-3 
+                        bg-[#8AE06C]/20 
+                        text-[#8AE06C]
+                        font-mono
+                        rounded-lg 
+                        border border-[#8AE06C]/40
+                        hover:bg-[#8AE06C]/30 
+                        transition-all
+                        disabled:opacity-40 disabled:cursor-not-allowed
+                    "
                 >
                     {isProcessing ? 'Processing...' : `Mint ${mintAmount} ${asset.symbol}`}
                 </button>

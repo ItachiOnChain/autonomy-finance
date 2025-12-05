@@ -1,8 +1,8 @@
-import React from 'react';
-import { useAccount } from 'wagmi';
-import { AssetCard } from '../components/AssetCard';
-import { UserPositions } from '../components/UserPositions';
-import { getSupplyAssets, getBorrowAssets } from '../config/assets';
+import React from "react";
+import { useAccount } from "wagmi";
+import { AssetCard } from "../components/AssetCard";
+import { UserPositions } from "../components/UserPositions";
+import { getSupplyAssets, getBorrowAssets } from "../config/assets";
 
 export const Core: React.FC = () => {
   const { isConnected } = useAccount();
@@ -11,63 +11,111 @@ export const Core: React.FC = () => {
   const borrowAssets = getBorrowAssets();
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="border-b border-black">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold font-mono">CORE INSTANCE</h1>
-          <p className="text-gray-600 mt-2">Multi-Asset Lending & Borrowing Protocol</p>
+    <div
+      className="min-h-screen w-full text-white"
+      style={{
+        backgroundColor: "#02060b",
+        backgroundImage: `
+          linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)
+        `,
+        backgroundSize: "50px 50px",
+      }}
+    >
+      {/* ================= HEADER ================= */}
+      <div className="border-b border-white/10 bg-black/60 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-[0.28em] uppercase">
+            CORE INSTANCE
+          </h1>
+          <p className="text-xs md:text-sm text-white/60 tracking-wide mt-2">
+            Multi-Asset Credit, Collateral & Yield Engine
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        {/* User Positions - Your Supplies & Your Borrows */}
-        <UserPositions />
+      {/* ================= BODY ================= */}
+      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* USER POSITIONS (ONLY IF WALLET CONNECTED) */}
+        {isConnected && (
+          <div
+            className="
+              bg-black/40 border border-[#8AE06C]/25 
+              rounded-2xl p-8 backdrop-blur-xl
+              shadow-[0_0_35px_rgba(138,224,108,0.18)]
+            "
+          >
+            <UserPositions />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+          {/* ================= SUPPLY SECTION ================= */}
           <div>
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold font-mono">ASSETS TO SUPPLY</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Supply assets to earn interest and use as collateral
-              </p>
-            </div>
+            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
+              ASSETS TO SUPPLY
+            </h2>
+            <p className="text-xs text-white/60 mt-1 mb-6">
+              Supply assets to earn yield & strengthen collateral.
+            </p>
 
-            <div className="space-y-4">
-              {supplyAssets.map(asset => (
-                <AssetCard key={asset.symbol} symbol={asset.symbol} type="supply" />
+            <div className="space-y-6">
+              {supplyAssets.map((asset) => (
+                <AssetCard
+                  key={asset.symbol}
+                  symbol={asset.symbol}
+                  type="supply"
+                />
               ))}
             </div>
           </div>
 
+          {/* ================= BORROW SECTION ================= */}
           <div>
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold font-mono">ASSETS TO BORROW</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Borrow assets against your collateral
-              </p>
-            </div>
+            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
+              ASSETS TO BORROW
+            </h2>
+            <p className="text-xs text-white/60 mt-1 mb-6">
+              Borrow assets against your supplied collateral.
+            </p>
 
-            <div className="space-y-4">
-              {borrowAssets.map(asset => (
-                <AssetCard key={asset.symbol} symbol={asset.symbol} type="borrow" />
+            <div className="space-y-6">
+              {borrowAssets.map((asset) => (
+                <AssetCard
+                  key={asset.symbol}
+                  symbol={asset.symbol}
+                  type="borrow"
+                />
               ))}
             </div>
           </div>
         </div>
 
+        {/* ================= WALLET WARNING ================= */}
         {!isConnected && (
-          <div className="card bg-yellow-50 border-yellow-300">
+          <div
+            className="
+              bg-[#8AE06C]/10 border border-[#8AE06C]/30 rounded-xl
+              p-6 font-mono tracking-wide 
+              shadow-[0_0_20px_rgba(138,224,108,0.25)]
+            "
+          >
             <div className="flex items-center gap-3">
-              <div className="text-2xl">⚠️</div>
+              <div className="text-xl text-[#8AE06C]">⚠</div>
               <div>
-                <div className="font-bold text-gray-900">Connect Your Wallet</div>
-                <div className="text-sm text-gray-600">
-                  Connect your wallet to start supplying and borrowing assets
+                <div className="font-bold uppercase text-[#8AE06C]">
+                  Wallet Not Connected
+                </div>
+                <div className="text-xs text-white/70 mt-1">
+                  Connect your wallet to supply or borrow assets.
                 </div>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

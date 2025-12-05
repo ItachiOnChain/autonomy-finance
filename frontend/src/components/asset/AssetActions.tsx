@@ -3,16 +3,10 @@ import React, { useState } from 'react';
 type ActionType = 'supply' | 'withdraw' | 'borrow' | 'repay';
 
 interface AssetActionsProps {
-    asset: {
-        symbol: string;
-        decimals: number;
-    };
+    asset: { symbol: string; decimals: number };
     isConnected: boolean;
     isProcessing: boolean;
-    userPosition: {
-        supplied: bigint;
-        borrowed: bigint;
-    };
+    userPosition: { supplied: bigint; borrowed: bigint };
     allowance: bigint;
     actions: {
         onSupply: (amount: string) => void;
@@ -21,12 +15,7 @@ interface AssetActionsProps {
         onRepay: (amount: string) => void;
         onApprove: (amount: string) => void;
     };
-    amounts: {
-        supply: string;
-        withdraw: string;
-        borrow: string;
-        repay: string;
-    };
+    amounts: { supply: string; withdraw: string; borrow: string; repay: string };
     setAmounts: {
         setSupply: (val: string) => void;
         setWithdraw: (val: string) => void;
@@ -47,152 +36,213 @@ export const AssetActions: React.FC<AssetActionsProps> = ({
 }) => {
     const [activeTab, setActiveTab] = useState<ActionType>('supply');
 
-    const tabs: { id: ActionType; label: string; color: string }[] = [
-        { id: 'supply', label: 'Supply', color: 'bg-green-600' },
-        { id: 'withdraw', label: 'Withdraw', color: 'bg-blue-600' },
-        { id: 'borrow', label: 'Borrow', color: 'bg-purple-600' },
-        { id: 'repay', label: 'Repay', color: 'bg-orange-600' }
+    const tabs: { id: ActionType; label: string }[] = [
+        { id: 'supply', label: 'SUPPLY' },
+        { id: 'withdraw', label: 'WITHDRAW' },
+        { id: 'borrow', label: 'BORROW' },
+        { id: 'repay', label: 'REPAY' }
     ];
 
-    // Filter tabs based on position (e.g. can't withdraw if nothing supplied)
-    // Actually, keeping all tabs visible is better UX, just disable inputs/buttons if needed
-    // But let's follow the original logic where panels were conditional?
-    // Original logic: Supply always visible. Withdraw if supplied > 0. Borrow always visible. Repay if borrowed > 0.
-    // Let's keep all tabs but maybe disable them visually or just show empty state?
-    // For a "professional" look, tabs are usually always there, or at least Supply/Borrow.
-    // Let's keep all tabs accessible.
-
-    const renderInput = (
-        value: string,
-        onChange: (val: string) => void,
-        placeholder: string = "0.0"
-    ) => (
+    /* ------------------- INPUT FIELD ------------------- */
+    const renderInput = (value: string, onChange: (v: string) => void) => (
         <input
             type="number"
-            placeholder={placeholder}
             value={value}
+            placeholder="0.00"
             onChange={(e) => onChange(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={!isConnected || isProcessing}
+            className="
+                w-full px-4 py-3 
+                rounded-xl 
+                bg-black/40 
+                border border-white/10 
+                text-white font-mono 
+                focus:border-[#8AE06C] 
+                focus:ring-0
+                placeholder-white/30
+                transition
+            "
         />
     );
 
+    /* ------------------- TAB CONTENT ------------------- */
     const renderTabContent = () => {
+        const toWei = (val: string) =>
+            val ? BigInt(Math.floor(parseFloat(val) * 10 ** asset.decimals)) : 0n;
+
         switch (activeTab) {
             case 'supply': {
-                const needsApproval = amounts.supply && BigInt(Math.floor(parseFloat(amounts.supply) * 10 ** asset.decimals)) > allowance;
+                const needsApproval = toWei(amounts.supply) > allowance;
                 return (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {renderInput(amounts.supply, setAmounts.setSupply)}
+
                         <button
-                            onClick={() => actions.onSupply(amounts.supply)}
-                            disabled={!isConnected || isProcessing || !amounts.supply}
-                            className={`w-full px-4 py-3 text-white rounded-lg font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed ${needsApproval ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'
-                                }`}
+                            onClick={() =>
+                                needsApproval
+                                    ? actions.onApprove(amounts.supply)
+                                    : actions.onSupply(amounts.supply)
+                            }
+                            disabled={!amounts.supply || isProcessing}
+                            className={`
+                                w-full py-3 rounded-xl font-mono 
+                                transition 
+                                ${needsApproval
+                                    ? 'bg-yellow-600/30 border border-yellow-400/40 text-yellow-300'
+                                    : 'bg-[#8AE06C]/20 border border-[#8AE06C]/40 text-[#8AE06C]'
+                                }
+                                hover:bg-[#8AE06C]/30
+                                disabled:opacity-40 disabled:cursor-not-allowed
+                            `}
                         >
-                            {isProcessing ? 'Processing...' : (needsApproval ? `Approve & Supply ${asset.symbol}` : 'Supply')}
+                            {isProcessing
+                                ? 'Processing...'
+                                : needsApproval
+                                ? `Approve & Supply ${asset.symbol}`
+                                : 'Supply'}
                         </button>
                     </div>
                 );
             }
-            case 'withdraw': {
-                if (userPosition.supplied === 0n) {
-                    return <div className="text-center text-gray-500 py-4">You have no assets to withdraw.</div>;
-                }
+
+            case 'withdraw':
+                if (userPosition.supplied === 0n)
+                    return <p className="text-center text-white/40 font-mono py-6">No supply available.</p>;
+
                 return (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {renderInput(amounts.withdraw, setAmounts.setWithdraw)}
+
                         <button
                             onClick={() => actions.onWithdraw(amounts.withdraw)}
-                            disabled={!isConnected || isProcessing || !amounts.withdraw}
-                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+                            disabled={!amounts.withdraw || isProcessing}
+                            className="
+                                w-full py-3 rounded-xl font-mono
+                                bg-blue-600/20 text-blue-300
+                                border border-blue-400/30
+                                hover:bg-blue-600/30
+                                transition
+                                disabled:opacity-40 disabled:cursor-not-allowed
+                            "
                         >
                             {isProcessing ? 'Processing...' : 'Withdraw'}
                         </button>
                     </div>
                 );
-            }
-            case 'borrow': {
+
+            case 'borrow':
                 return (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {renderInput(amounts.borrow, setAmounts.setBorrow)}
+
                         <button
                             onClick={() => actions.onBorrow(amounts.borrow)}
-                            disabled={!isConnected || isProcessing || !amounts.borrow}
-                            className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+                            disabled={!amounts.borrow || isProcessing}
+                            className="
+                                w-full py-3 rounded-xl font-mono
+                                bg-purple-600/20 text-purple-300
+                                border border-purple-400/40
+                                hover:bg-purple-600/30
+                                transition
+                                disabled:opacity-40 disabled:cursor-not-allowed
+                            "
                         >
                             {isProcessing ? 'Processing...' : 'Borrow'}
                         </button>
                     </div>
                 );
-            }
+
             case 'repay': {
-                if (userPosition.borrowed === 0n) {
-                    return <div className="text-center text-gray-500 py-4">You have no debt to repay.</div>;
-                }
-                // Check if approval is needed (same logic as supply)
-                const needsApproval = amounts.repay && BigInt(Math.floor(parseFloat(amounts.repay) * 10 ** asset.decimals)) > allowance;
+                if (userPosition.borrowed === 0n)
+                    return <p className="text-center text-white/40 font-mono py-6">No debt to repay.</p>;
+
+                const needsApproval = toWei(amounts.repay) > allowance;
+
                 return (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {renderInput(amounts.repay, setAmounts.setRepay)}
-                        {needsApproval ? (
-                            <button
-                                onClick={() => actions.onApprove(amounts.repay)}
-                                disabled={!isConnected || isProcessing || !amounts.repay}
-                                className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
-                            >
-                                {isProcessing ? 'Processing...' : `Approve ${asset.symbol}`}
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => actions.onRepay(amounts.repay)}
-                                disabled={!isConnected || isProcessing || !amounts.repay}
-                                className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
-                            >
-                                {isProcessing ? 'Processing...' : 'Repay'}
-                            </button>
-                        )}
+
+                        <button
+                            onClick={() =>
+                                needsApproval
+                                    ? actions.onApprove(amounts.repay)
+                                    : actions.onRepay(amounts.repay)
+                            }
+                            disabled={!amounts.repay || isProcessing}
+                            className={`
+                                w-full py-3 rounded-xl font-mono 
+                                transition
+                                ${
+                                    needsApproval
+                                        ? 'bg-yellow-600/30 border border-yellow-400/40 text-yellow-300'
+                                        : 'bg-orange-600/20 border border-orange-400/40 text-orange-300'
+                                }
+                                hover:bg-orange-600/30
+                                disabled:opacity-40 disabled:cursor-not-allowed
+                            `}
+                        >
+                            {isProcessing
+                                ? 'Processing...'
+                                : needsApproval
+                                ? `Approve ${asset.symbol}`
+                                : 'Repay'}
+                        </button>
                     </div>
                 );
             }
         }
     };
 
+    /* ------------------- DISCONNECTED STATE ------------------- */
     if (!isConnected) {
         return (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-                    <div className="text-sm text-yellow-800">
-                        Connect your wallet to interact with this asset
-                    </div>
-                </div>
+            <div className="
+                bg-black/40 border border-white/10 
+                rounded-2xl p-6 text-center font-mono text-white/70
+            ">
+                Connect wallet to interact
             </div>
         );
     }
 
+    /* ------------------- MAIN PANEL ------------------- */
     return (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div
+            className="
+                bg-black/40 
+                backdrop-blur-xl 
+                border border-white/10 
+                rounded-2xl 
+                overflow-hidden 
+                shadow-[0_0_20px_rgba(138,224,108,0.08)]
+            "
+        >
             {/* Tabs */}
-            <div className="flex border-b border-gray-200">
-                {tabs.map(tab => (
+            <div className="flex border-b border-white/10">
+                {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${activeTab === tab.id ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                            }`}
+                        className={`
+                            flex-1 py-4 text-xs font-mono tracking-wide 
+                            transition relative
+                            ${
+                                activeTab === tab.id
+                                    ? 'text-[#8AE06C]'
+                                    : 'text-white/40 hover:text-white/70'
+                            }
+                        `}
                     >
                         {tab.label}
                         {activeTab === tab.id && (
-                            <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${tab.color}`}></div>
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#8AE06C]" />
                         )}
                     </button>
                 ))}
             </div>
 
             {/* Content */}
-            <div className="p-6">
-                {renderTabContent()}
-            </div>
+            <div className="p-6">{renderTabContent()}</div>
         </div>
     );
 };

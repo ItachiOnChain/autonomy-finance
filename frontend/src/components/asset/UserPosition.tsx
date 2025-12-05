@@ -3,10 +3,7 @@ import { formatUnits } from 'viem';
 import { formatHealthFactor } from '../../utils/formatters';
 
 interface UserPositionProps {
-    asset: {
-        symbol: string;
-        decimals: number;
-    };
+    asset: { symbol: string; decimals: number };
     position: {
         balance: bigint;
         supplied: bigint;
@@ -22,34 +19,45 @@ export const UserPosition: React.FC<UserPositionProps> = ({ asset, position, isC
     const { balance, supplied, borrowed, healthFactor } = position;
 
     return (
-        <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Your Position</h2>
+        <div
+            className="
+                bg-black/40 
+                border border-white/10 
+                rounded-2xl 
+                p-6 
+                backdrop-blur-xl
+                font-mono
+                shadow-[0_0_20px_rgba(138,224,108,0.12)]
+            "
+        >
+            <h2 className="text-sm text-white/60 tracking-[0.25em] uppercase mb-6">
+                Your Position
+            </h2>
 
-            <div className="space-y-4">
-                <div>
-                    <div className="text-xs text-gray-500 mb-1">Wallet Balance</div>
-                    <div className="font-mono text-lg font-bold text-gray-900">
-                        {formatUnits(balance, asset.decimals)} {asset.symbol}
+            <div className="space-y-6">
+                {[
+                    { label: "Wallet Balance", value: formatUnits(balance, asset.decimals) },
+                    { label: "Supplied", value: formatUnits(supplied, asset.decimals) },
+                    { label: "Borrowed", value: formatUnits(borrowed, asset.decimals) }
+                ].map((item, i) => (
+                    <div key={i}>
+                        <div className="text-[10px] text-white/50 tracking-wide mb-1">{item.label}</div>
+                        <div className="text-xl font-bold text-white">{item.value} {asset.symbol}</div>
                     </div>
-                </div>
+                ))}
 
-                <div>
-                    <div className="text-xs text-gray-500 mb-1">Supplied</div>
-                    <div className="font-mono text-xl font-bold text-gray-900">
-                        {formatUnits(supplied, asset.decimals)} {asset.symbol}
-                    </div>
-                </div>
+                {/* Health Factor */}
+                <div className="pt-4 border-t border-white/10">
+                    <div className="text-[10px] text-white/50 tracking-wide mb-1">Health Factor</div>
 
-                <div>
-                    <div className="text-xs text-gray-500 mb-1">Borrowed</div>
-                    <div className="font-mono text-xl font-bold text-gray-900">
-                        {formatUnits(borrowed, asset.decimals)} {asset.symbol}
-                    </div>
-                </div>
-
-                <div className="pt-3 border-t border-gray-300">
-                    <div className="text-xs text-gray-500 mb-1">Health Factor</div>
-                    <div className={`font-mono text-lg font-bold ${healthFactor > 1.5 ? 'text-green-600' : healthFactor > 1.0 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <div
+                        className={`
+                            text-xl font-bold 
+                            ${healthFactor > 1.5 ? "text-[#8AE06C]" :
+                                healthFactor > 1.0 ? "text-yellow-400" :
+                                    "text-red-500"}
+                        `}
+                    >
                         {formatHealthFactor(healthFactor)}
                     </div>
                 </div>
