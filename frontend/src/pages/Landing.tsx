@@ -423,7 +423,6 @@ const WhyAutonomy = () => {
  *  BUILT FOR — AUTONOMY SECTION
 **************************************/
 
-
 export const BuiltFor: React.FC = () => {
   const groups = [
     { title: "Musicians", desc: "Turn royalties into programmable collateral." },
@@ -461,14 +460,14 @@ export const BuiltFor: React.FC = () => {
 
         <div
           className="flex gap-8 w-max"
-          style={{ animation: "builtForLoop 22s linear infinite" }}
+          style={{ animation: "builtForLoop 20s linear infinite" }}
         >
-          {/* First cycle */}
+          {/* Normal cycle */}
           {groups.map((g, i) => (
             <Card key={`row1-${i}`} title={g.title} desc={g.desc} />
           ))}
 
-          {/* Duplicate cycle for seamless loop */}
+          {/* Duplicate cycle */}
           {groups.map((g, i) => (
             <Card key={`row2-${i}`} title={g.title} desc={g.desc} />
           ))}
@@ -479,35 +478,35 @@ export const BuiltFor: React.FC = () => {
 };
 
 /**************************************
- *  CARD COMPONENT
- *  Green background + bigger text + white text
+ *  CARD COMPONENT — FINAL VERSION
 **************************************/
 const Card = ({ title, desc }: { title: string; desc: string }) => (
   <div
     className="
-      min-w-[240px]   /* Slightly wider for larger text */
+      min-w-[250px]
       h-[240px]
-      px-5 py-6
+      px-6 py-7
       rounded-2xl
 
-      /* GREEN GLOW BACKGROUND */
-      bg-[#8AE06C]/35
+      /* GREEN GLASS BACKGROUND */
+      
       border border-[#8AE06C]/60
-      shadow-[0_0_40px_rgba(138,224,108,0.45)]
-      backdrop-blur-md
+      backdrop-blur-xl
+      shadow-[0_0_40px_rgba(138,224,108,0.35)]
 
       flex flex-col justify-between
       transition-all duration-300
-      hover:bg-[#8AE06C]/50
-      hover:shadow-[0_0_55px_rgba(138,224,108,0.75)]
+      hover:bg-[#8AE06C]/45
+      hover:shadow-[0_0_55px_rgba(138,224,108,0.65)]
     "
   >
-    {/* TITLE — Larger + White */}
-    <p className="text-base font-semibold text-white leading-tight">
+
+    {/* TITLE */}
+    <p className="text-lg font-semibold text-white leading-tight">
       {title}
     </p>
 
-    {/* DESCRIPTION — Larger + White */}
+    {/* DESCRIPTION */}
     <p className="text-sm text-white/90 leading-snug">
       {desc}
     </p>
