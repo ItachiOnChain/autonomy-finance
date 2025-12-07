@@ -192,26 +192,23 @@ const HowStepsLeftGrid: React.FC = () => {
               key={step.label}
               className={`flex items-center gap-4 px-6 py-3 rounded-xl border min-w-[190px]
                 transition-all duration-300
-                ${
-                  isActive
-                    ? "border-[#8AE06C] bg-[#8AE06C]/15 shadow-[0_0_28px_rgba(138,224,108,0.18)]"
-                    : "border-white/15 bg-black/40"
+                ${isActive
+                  ? "border-[#8AE06C] bg-[#8AE06C]/15 shadow-[0_0_28px_rgba(138,224,108,0.18)]"
+                  : "border-white/15 bg-black/40"
                 }`}
             >
               <div
                 className={`w-6 h-6 rounded-[5px] border flex items-center justify-center text-md font-bold
-                  ${
-                    isActive
-                      ? "border-[#8AE06C] bg-[#8AE06C]/30 text-[#8AE06C]"
-                      : "border-white/40 text-white/30"
+                  ${isActive
+                    ? "border-[#8AE06C] bg-[#8AE06C]/30 text-[#8AE06C]"
+                    : "border-white/40 text-white/30"
                   }`}
               >
                 {isActive ? "✓" : ""}
               </div>
               <span
-                className={`text-[13px] font-mono tracking-[0.15em] uppercase ${
-                  isActive ? "text-[#8AE06C]" : "text-[#8AE06C]/65"
-                }`}
+                className={`text-[13px] font-mono tracking-[0.15em] uppercase ${isActive ? "text-[#8AE06C]" : "text-[#8AE06C]/65"
+                  }`}
               >
                 {step.label}
               </span>
@@ -273,10 +270,9 @@ const HowItWorksCarousel: React.FC = () => {
         className={`w-full max-w-3xl border border-[#8AE06C]/40 bg-black/60 backdrop-blur-2xl rounded-2xl 
           p-4 md:p-5 shadow-[0_0_40px_rgba(138,224,108,0.35)]
           transition-all duration-700
-          ${
-            visible
-              ? "opacity-100 translate-y-0 scale-100"
-              : "opacity-0 translate-y-8 scale-95"
+          ${visible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-8 scale-95"
           }`}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -343,19 +339,19 @@ const WhyAutonomy = () => {
 
         {/* HEADER */}
         <div className="text-center mb-16 font-mono">
-         <p className="text-base md:text-lg tracking-[0.32em] text-[#8AE06C]/85 uppercase">
-  WHY AUTONOMY
-</p>
+          <p className="text-base md:text-lg tracking-[0.32em] text-[#8AE06C]/85 uppercase">
+            WHY AUTONOMY
+          </p>
 
-<h2
-  className="
+          <h2
+            className="
     mt-4 text-lg md:text-2xl lg:text-3xl xl:text-4xl font-mono font-bold
     tracking-[0.32em] text-white uppercase
   "
->
-  THE FLAGSHIP PRIMITIVE FOR{" "}
-  <span className="text-[#8AE06C] tracking-[0.32em]">CREATOR CREDIT</span>
-</h2>
+          >
+            THE FLAGSHIP PRIMITIVE FOR{" "}
+            <span className="text-[#8AE06C] tracking-[0.32em]">CREATOR CREDIT</span>
+          </h2>
 
         </div>
 
@@ -366,9 +362,8 @@ const WhyAutonomy = () => {
             {left.map((f, i) => (
               <div
                 key={i}
-                className={`w-56 transition-all duration-500 ${
-                  hover ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
-                }`}
+                className={`w-56 transition-all duration-500 ${hover ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
+                  }`}
               >
                 <p className="text-base font-semibold text-white">{f.title}</p>
                 <p className="text-xs text-white/60">{f.desc}</p>
@@ -391,9 +386,8 @@ const WhyAutonomy = () => {
           >
             <img src="/green1.png" className="w-full h-full object-cover" />
             <div
-              className={`absolute inset-0 bg-[#8AE06C]/15 transition-opacity duration-500 ${
-                hover ? "opacity-60" : "opacity-0"
-              }`}
+              className={`absolute inset-0 bg-[#8AE06C]/15 transition-opacity duration-500 ${hover ? "opacity-60" : "opacity-0"
+                }`}
             />
           </div>
 
@@ -402,9 +396,8 @@ const WhyAutonomy = () => {
             {right.map((f, i) => (
               <div
                 key={i}
-                className={`w-56 transition-all duration-500 ${
-                  hover ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
-                }`}
+                className={`w-56 transition-all duration-500 ${hover ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
+                  }`}
               >
                 <p className="text-base font-semibold text-white">{f.title}</p>
                 <p className="text-xs text-white/60">{f.desc}</p>
@@ -449,6 +442,10 @@ export const BuiltFor: React.FC = () => {
 
       {/* INFINITE LOOP */}
       <div className="relative overflow-hidden">
+        {/* FADE OVERLAYS */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#02060b] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#02060b] to-transparent z-10 pointer-events-none" />
+
         <style>
           {`
             @keyframes builtForLoop {

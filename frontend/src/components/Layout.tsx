@@ -9,22 +9,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-/* NAV WORDS */
-const navWords = ["Borrowing", "Credit", "IP Loans", "Auto-Repay"];
-
-const AnimatedNavWord: React.FC = () => {
-  const [index, setIndex] = React.useState(0);
-
-  React.useEffect(() => {
-    const id = setInterval(
-      () => setIndex((prev) => (prev + 1) % navWords.length),
-      1800
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  return <span className="text-primary drop-shadow-[0_0_6px_#8AE06C]">{navWords[index]}</span>;
-};
+import { useDisconnect } from "wagmi";
 
 const Divider = () => <span className="text-primary/40 select-none">|</span>;
 
@@ -36,6 +21,65 @@ const NavItem = ({ to, children }: any) => (
     {children}
   </Link>
 );
+
+/* CUSTOM CONNECT BUTTON WITH DISCONNECT */
+const NavConnectButton = () => {
+  const { disconnect } = useDisconnect();
+  const [showDisconnect, setShowDisconnect] = React.useState(false);
+
+  return (
+    <ConnectButton.Custom>
+      {({ openConnectModal, account, mounted }) => {
+        const connected = mounted && account;
+
+        return (
+          <div className="relative">
+            <button
+              onClick={() => {
+                if (connected) {
+                  setShowDisconnect(!showDisconnect);
+                } else {
+                  openConnectModal();
+                }
+              }}
+              className={`
+                px-4 py-2 font-mono text-xs lg:text-sm rounded-md border border-[#8AE06C]
+                ${connected ? "bg-black text-[#8AE06C]" : "bg-[#8AE06C] text-black"}
+                hover:shadow-[0_0_14px_rgba(138,224,108,0.8)]
+                hover:bg-[#a4f17f] transition-all
+              `}
+            >
+              {connected ? "CONNECTED" : "CONNECT WALLET"}
+            </button>
+
+            {/* Disconnect Popover */}
+            {showDisconnect && connected && (
+              <div className="absolute right-0 mt-2 w-48 bg-black border border-[#8AE06C]/30 rounded-xl p-4 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200">
+                <p className="text-white/80 text-xs font-mono mb-3 text-center">
+                  Do you want to disconnect?
+                </p>
+                <button
+                  onClick={() => {
+                    disconnect();
+                    setShowDisconnect(false);
+                  }}
+                  className="w-full py-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-md text-xs font-mono transition-colors"
+                >
+                  DISCONNECT
+                </button>
+              </div>
+            )}
+
+            {/* Click outside closer (simple overlay) */}
+            {showDisconnect && (
+              <div className="fixed inset-0 z-40 cursor-default" onClick={() => setShowDisconnect(false)} />
+            )}
+          </div>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
+};
 
 /* MAIN LAYOUT */
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -72,41 +116,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* NAV */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-mono text-white/70">
-            <NavItem to="/core">Protocol</NavItem>
+            <NavItem to="/core">Dashboard</NavItem>
             <Divider />
 
             <NavItem to="/ip-mint">Mint IP</NavItem>
             <Divider />
 
             <NavItem to="/ip-dashboard">IP Dashboard</NavItem>
-            <Divider />
-
-            <NavItem to="/core">
-              <AnimatedNavWord />
-            </NavItem>
           </nav>
 
           {/* WALLET BTN */}
           <div className="flex items-center">
-            <ConnectButton.Custom>
-              {({ openConnectModal, account, mounted }) => {
-                const connected = mounted && account;
-
-                return (
-                  <button
-                    onClick={openConnectModal}
-                    className={`
-                      px-4 py-2 font-mono text-xs lg:text-sm rounded-md border border-[#8AE06C]
-                      ${connected ? "bg-black text-[#8AE06C]" : "bg-[#8AE06C] text-black"}
-                      hover:shadow-[0_0_14px_rgba(138,224,108,0.8)]
-                      hover:bg-[#a4f17f] transition-all
-                    `}
-                  >
-                    {connected ? "CONNECTED" : "CONNECT WALLET"}
-                  </button>
-                );
-              }}
-            </ConnectButton.Custom>
+            <NavConnectButton />
           </div>
         </div>
       </header>
