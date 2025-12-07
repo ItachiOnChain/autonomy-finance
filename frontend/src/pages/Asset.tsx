@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  useAccount, 
-  useWaitForTransactionReceipt, 
-  usePublicClient 
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  usePublicClient
 } from 'wagmi';
 import { parseUnits } from 'viem';
 import { getAssetBySymbol } from '../config/assets';
@@ -11,11 +11,12 @@ import {
   useAssetData,
   useUserPosition,
   useLendingPool,
-  useUserHealthFactor,
+  useHealthFactor,
   useTokenBalance,
-  useTokenAllowance
+  useAllowance,
+  useApprove
 } from '../hooks/useLendingPool';
-import { CONTRACTS } from '../config/contracts';
+import { getContracts, MARKET_CHAIN_ID } from '../config/contracts';
 
 // Components
 import { AssetHeader } from '../components/asset/AssetHeader';
@@ -23,7 +24,10 @@ import { ReserveOverview } from '../components/asset/ReserveOverview';
 import { InterestRates } from '../components/asset/InterestRates';
 import { AssetInfo } from '../components/asset/AssetInfo';
 import { UserPosition } from '../components/asset/UserPosition';
-import { MintPanel } from '../components/asset/MintPanel';
+import { MintBox } from '../components/asset/MintBox';
+
+
+
 import { AssetActions } from '../components/asset/AssetActions';
 import { AutoRepayPanel } from '../components/asset/AutoRepayPanel';
 
@@ -53,7 +57,7 @@ export const Asset: React.FC = () => {
   const [borrowAmount, setBorrowAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [repayAmount, setRepayAmount] = useState('');
-  const [mintAmount, setMintAmount] = useState('1000');
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | undefined>();
@@ -82,9 +86,9 @@ export const Asset: React.FC = () => {
     );
   }
 
-  // Contract address
-  // @ts-ignore
-  const assetAddress = (CONTRACTS as any)[asset.symbol]?.address as string;
+  // Contract address from MARKET chain
+  const contracts = getContracts(MARKET_CHAIN_ID);
+  const assetAddress = (contracts as any)?.[asset.symbol]?.address as string;
 
   // Custom hooks
   const {
@@ -99,9 +103,10 @@ export const Asset: React.FC = () => {
 
   const { supplied, borrowed, refetch: refetchPosition } = useUserPosition(assetAddress);
   const { balance, refetch: refetchBalance } = useTokenBalance(assetAddress);
-  const { allowance, refetch: refetchAllowance } = useTokenAllowance(assetAddress);
-  const { supply, withdraw, borrow, repay, approve, mint, isPending } = useLendingPool();
-  const { healthFactor, refetch: refetchHealthFactor } = useUserHealthFactor();
+  const { allowance, refetch: refetchAllowance } = useAllowance(assetAddress);
+  const { supply, withdraw, borrow, repay, isPending } = useLendingPool();
+  const { approve } = useApprove(assetAddress);
+  const { healthFactor, refetch: refetchHealthFactor } = useHealthFactor();
 
   const publicClient = usePublicClient();
 
@@ -151,11 +156,12 @@ export const Asset: React.FC = () => {
     }
   };
 
-  const handleMint = () => 
-    handleTransaction('Mint', () => mint(assetAddress, mintAmount, asset.decimals), mintAmount);
 
-  const handleApprove = (amt: string) =>
-    handleTransaction('Approve', () => approve(assetAddress, amt, asset.decimals), amt);
+
+  const handleApprove = async (amt: string) => {
+    const amountWei = parseUnits(amt, asset.decimals);
+    return handleTransaction('Approve', () => approve(amountWei), amt);
+  };
 
   const handleSupply = async (amount: string) => {
     const amountWei = parseUnits(amount, asset.decimals);
@@ -167,24 +173,30 @@ export const Asset: React.FC = () => {
 
     // Approval if needed
     if (allowance < amountWei) {
-      const approveHash = await approve(assetAddress, amount, asset.decimals);
+      const approveHash = await approve(amountWei);
       if (approveHash) {
         await publicClient?.waitForTransactionReceipt({ hash: approveHash });
         await refetchAllowance();
       }
     }
 
-    handleTransaction('Supply', () => supply(assetAddress, amount, asset.decimals), amount);
+    handleTransaction('Supply', () => supply(assetAddress, amountWei), amount);
   };
 
-  const handleWithdraw = (amount: string) =>
-    handleTransaction('Withdraw', () => withdraw(assetAddress, amount, asset.decimals), amount);
+  const handleWithdraw = (amount: string) => {
+    const amountWei = parseUnits(amount, asset.decimals);
+    return handleTransaction('Withdraw', () => withdraw(assetAddress, amountWei), amount);
+  };
 
-  const handleBorrow = (amount: string) =>
-    handleTransaction('Borrow', () => borrow(assetAddress, amount, asset.decimals), amount);
+  const handleBorrow = (amount: string) => {
+    const amountWei = parseUnits(amount, asset.decimals);
+    return handleTransaction('Borrow', () => borrow(assetAddress, amountWei), amount);
+  };
 
-  const handleRepay = (amount: string) =>
-    handleTransaction('Repay', () => repay(assetAddress, amount, asset.decimals), amount);
+  const handleRepay = (amount: string) => {
+    const amountWei = parseUnits(amount, asset.decimals);
+    return handleTransaction('Repay', () => repay(assetAddress, amountWei), amount);
+  };
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -321,14 +333,7 @@ export const Asset: React.FC = () => {
 
             <Panel>
               <div className="p-6">
-                <MintPanel
-                  asset={asset}
-                  mintAmount={mintAmount}
-                  setMintAmount={setMintAmount}
-                  onMint={handleMint}
-                  isProcessing={isProcessing}
-                  isConnected={isConnected}
-                />
+                <MintBox asset={asset} assetAddress={assetAddress} />
               </div>
             </Panel>
           </div>

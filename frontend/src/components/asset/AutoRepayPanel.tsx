@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatUnits } from 'viem';
 import { useStoryProtocol } from '../../hooks/useStoryProtocol';
-import { CONTRACTS } from '../../config/contracts';
+import { getContracts, MARKET_CHAIN_ID } from '../../config/contracts';
 import { useAccount } from 'wagmi';
 import { ROYALTY_TOKENS, type RoyaltyToken } from '../../config/royaltyTokens';
 
@@ -108,13 +108,23 @@ export const AutoRepayPanel: React.FC<AutoRepayPanelProps> = ({
                 return;
             }
 
+            // Get contracts for MARKET chain
+            const contracts = getContracts(MARKET_CHAIN_ID);
+            const MockRoyaltyToken = contracts?.MockRoyaltyToken;
+
+            if (!MockRoyaltyToken) {
+                setError('MockRoyaltyToken not available');
+                setIsProcessing(false);
+                return;
+            }
+
             setSuccess('⏳ Claiming royalties...');
-            await claimRoyalty(ipaId, CONTRACTS.MockRoyaltyToken.address);
+            await claimRoyalty(ipaId, MockRoyaltyToken.address);
 
             setSuccess('⏳ Executing auto-repay...');
             await autoRepayFromRoyalty(
                 ipaId,
-                CONTRACTS.MockRoyaltyToken.address,
+                MockRoyaltyToken.address,
                 mock.balance,
                 '0',
                 50,
@@ -162,9 +172,8 @@ export const AutoRepayPanel: React.FC<AutoRepayPanelProps> = ({
                 </div>
 
                 <svg
-                    className={`w-5 h-5 text-white/50 transition-transform ${
-                        isExpanded ? 'rotate-180' : ''
-                    }`}
+                    className={`w-5 h-5 text-white/50 transition-transform ${isExpanded ? 'rotate-180' : ''
+                        }`}
                     fill="none"
                     stroke="currentColor"
                 >
@@ -252,10 +261,9 @@ export const AutoRepayPanel: React.FC<AutoRepayPanelProps> = ({
                                             key={token.symbol}
                                             className={`
                                                 p-2 rounded-xl text-center border 
-                                                ${
-                                                    balanceRaw > 0n
-                                                        ? 'border-[#8AE06C]/40 bg-[#8AE06C]/10 text-[#8AE06C]'
-                                                        : 'border-white/10 bg-black/30 text-white/40'
+                                                ${balanceRaw > 0n
+                                                    ? 'border-[#8AE06C]/40 bg-[#8AE06C]/10 text-[#8AE06C]'
+                                                    : 'border-white/10 bg-black/30 text-white/40'
                                                 }
                                             `}
                                         >

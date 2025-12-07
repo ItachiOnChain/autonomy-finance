@@ -2,19 +2,21 @@ import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
 import { ASSETS } from "../config/assets";
-import { useUserPosition } from "../hooks/useLendingPool";
-import { CONTRACTS } from "../config/contracts";
+import { useUserPosition, useHealthFactor } from "../hooks/useLendingPool";
+import { getContracts, MARKET_CHAIN_ID } from "../config/contracts";
 import { EModeToggle } from "./EModeToggle";
 
 /* ROW COMPONENT */
 const UserPositionRow = ({ symbol, type }: any) => {
   const navigate = useNavigate();
+  const contracts = getContracts(MARKET_CHAIN_ID);
   const asset = ASSETS.find((a) => a.symbol === symbol);
-  const assetAddress = asset ? (CONTRACTS as any)[asset.symbol]?.address : undefined;
+  const assetAddress = asset ? (contracts as any)?.[asset.symbol]?.address : undefined;
 
   const { supplied, borrowed } = useUserPosition(assetAddress || "");
 
   const amount = type === "supply" ? supplied : borrowed;
+  // If amount is 0, don't show the row (unless we want to show 0 balances, but prompted said "Nothing supplied yet")
   if (!asset || !assetAddress || amount === 0n) return null;
 
   return (
@@ -52,14 +54,26 @@ export const UserPositions = () => {
   const { isConnected } = useAccount();
   if (!isConnected) return null;
 
+  const contracts = getContracts(MARKET_CHAIN_ID);
+
   const positions = ASSETS.map((asset) => {
-    const assetAddress = (CONTRACTS as any)[asset.symbol]?.address;
+    const assetAddress = (contracts as any)?.[asset.symbol]?.address;
     const pos = useUserPosition(assetAddress || "");
     return { symbol: asset.symbol, assetAddress, ...pos };
   });
 
   const hasSupplies = positions.some((p) => p.supplied > 0n);
   const hasBorrows = positions.some((p) => p.borrowed > 0n);
+
+  const { healthFactor } = useHealthFactor();
+
+  // Format Health Factor
+  // If > 100 or 0 with no debt, usually show infinity symbol or Max
+  // If user has NO debt, HF is technically infinity. Contract returns type(uint256).max.
+  // Our hook divides by 10000. So max uint256 / 10000 is still huge.
+  // Let's settle on: if HF > 100 -> "∞"
+  const formattedHF = healthFactor > 100 ? "∞" : healthFactor.toFixed(2);
+  const hfColor = healthFactor > 2 ? "text-green-400" : healthFactor > 1.1 ? "text-orange-400" : "text-red-500";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -99,7 +113,17 @@ export const UserPositions = () => {
           <h2 className="text-base font-mono tracking-wide text-white">
             Your Borrows
           </h2>
-          <EModeToggle />
+          <div className="flex items-center gap-4">
+            {hasBorrows && (
+              <div className="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2">
+                <span className="text-xs text-white/60 font-mono uppercase tracking-wider">Health Factor</span>
+                <span className={`text-sm font-bold font-mono ${formattedHF === "∞" ? "text-green-400" : hfColor}`}>
+                  {formattedHF}
+                </span>
+              </div>
+            )}
+            <EModeToggle />
+          </div>
         </div>
 
         {hasBorrows ? (

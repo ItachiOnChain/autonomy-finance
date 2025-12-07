@@ -1,28 +1,31 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { anvil, sepolia } from 'wagmi/chains';
 import { http } from 'wagmi';
 
-// Define Story Testnet chain
-const storyTestnet = {
-    id: 1513, // Replace with actual Story Testnet Chain ID if different
-    name: 'Story Testnet',
+// Define Story Aeneid Testnet chain (PRIMARY AND ONLY CHAIN)
+const storyAeneid = {
+    id: 1315, // Story Aeneid testnet chain ID
+    name: 'Story Aeneid Testnet',
     nativeCurrency: { name: 'IP', symbol: 'IP', decimals: 18 },
     rpcUrls: {
-        default: { http: ['https://rpc.odyssey.storyrpc.io'] }, // Replace with actual RPC
+        default: { http: [import.meta.env.VITE_STORY_RPC_URL] },
     },
     blockExplorers: {
-        default: { name: 'Story Explorer', url: 'https://explorer.story.foundation' },
+        default: { name: 'Story Aeneid Explorer', url: 'https://aeneid.storyscan.io' },
     },
     testnet: true,
 } as const;
 
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+const rpcUrl = import.meta.env.VITE_STORY_RPC_URL;
+
+if (!projectId) throw new Error("Missing VITE_WALLETCONNECT_PROJECT_ID");
+if (!rpcUrl) throw new Error("Missing VITE_STORY_RPC_URL");
+
 export const config = getDefaultConfig({
     appName: 'Autonomy Finance',
-    projectId: 'YOUR_PROJECT_ID', // Replace with actual WalletConnect Project ID
-    chains: [anvil, sepolia, storyTestnet],
+    projectId,
+    chains: [storyAeneid], // Story Aeneid ONLY
     transports: {
-        [anvil.id]: http(),
-        [sepolia.id]: http(),
-        [storyTestnet.id]: http(),
+        [storyAeneid.id]: http(rpcUrl),
     },
 });

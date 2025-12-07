@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { useAccount, usePublicClient, useWalletClient, useChainId } from 'wagmi';
 import { parseEther, parseUnits, type Address } from 'viem';
-import { CONTRACTS } from '../config/contracts';
+import { getContracts } from '../config/contracts';
 
 // Types
 export interface IPMetadata {
@@ -23,9 +23,16 @@ export function useStoryProtocol() {
     const { address } = useAccount();
     const publicClient = usePublicClient();
     const { data: walletClient } = useWalletClient();
+    const chainId = useChainId();
+    const contracts = getContracts(chainId);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Safe check for contracts
+    if (!contracts) {
+        console.error('[useStoryProtocol] No contracts found for current chain');
+    }
 
     // Phase detection
     const isPhase1 = import.meta.env.VITE_NETWORK !== 'story';
@@ -54,10 +61,14 @@ export function useStoryProtocol() {
             let ipaId;
 
             if (isPhase1) {
+                if (!contracts?.MockIPAssetRegistry) {
+                    throw new Error('MockIPAssetRegistry not configured for this network');
+                }
+
                 // Call MockIPAssetRegistry
                 const hash = await walletClient.writeContract({
-                    address: CONTRACTS.MockIPAssetRegistry.address as Address,
-                    abi: CONTRACTS.MockIPAssetRegistry.abi,
+                    address: contracts.MockIPAssetRegistry.address as Address,
+                    abi: contracts.MockIPAssetRegistry.abi,
                     functionName: 'mintIP',
                     args: [address, metadataUri],
                 });
@@ -73,8 +84,8 @@ export function useStoryProtocol() {
 
                 // Auto-create vault for this IPA
                 const vaultHash = await walletClient.writeContract({
-                    address: CONTRACTS.MockRoyaltyVault.address as Address,
-                    abi: CONTRACTS.MockRoyaltyVault.abi,
+                    address: contracts.MockRoyaltyVault.address as Address,
+                    abi: contracts.MockRoyaltyVault.abi,
                     functionName: 'createVault',
                     args: [ipaId],
                 });
@@ -107,10 +118,14 @@ export function useStoryProtocol() {
             // Convert string IP ID to bytes32 if needed
             const ipaIdBytes32 = ensureBytes32(ipaId);
 
+            if (!contracts?.IP_MANAGER) {
+                throw new Error('IP_MANAGER not configured for this network');
+            }
+
             // Lock IPA with zero collateral value (not used as collateral, only for auto-repay)
             const hash = await walletClient.writeContract({
-                address: CONTRACTS.IP_MANAGER.address as Address,
-                abi: CONTRACTS.IP_MANAGER.abi,
+                address: contracts.IP_MANAGER.address as Address,
+                abi: contracts.IP_MANAGER.abi,
                 functionName: 'lockIPA',
                 args: [ipaIdBytes32, address, 0n], // 0 collateral value
             });
@@ -150,7 +165,7 @@ export function useStoryProtocol() {
             // Get token decimals
             const decimals = await publicClient.readContract({
                 address: token as Address,
-                abi: CONTRACTS.MockRoyaltyToken.abi, // All ERC20s have decimals()
+                abi: contracts?.MockRoyaltyToken?.abi || [], // All ERC20s have decimals()
                 functionName: 'decimals',
             }) as number;
 
@@ -160,17 +175,21 @@ export function useStoryProtocol() {
             const ipaIdBytes32 = ensureBytes32(ipaId);
 
             // Check if vault exists, create if not
+            if (!contracts?.MockRoyaltyVault) {
+                throw new Error('MockRoyaltyVault not configured for this network');
+            }
+
             const vaultAddress = await publicClient.readContract({
-                address: CONTRACTS.MockRoyaltyVault.address as Address,
-                abi: CONTRACTS.MockRoyaltyVault.abi,
+                address: contracts.MockRoyaltyVault.address as Address,
+                abi: contracts.MockRoyaltyVault.abi,
                 functionName: 'getVaultAddress',
                 args: [ipaIdBytes32],
             });
 
             if (!vaultAddress || vaultAddress === '0x0000000000000000000000000000000000000000') {
                 const vaultHash = await walletClient.writeContract({
-                    address: CONTRACTS.MockRoyaltyVault.address as Address,
-                    abi: CONTRACTS.MockRoyaltyVault.abi,
+                    address: contracts.MockRoyaltyVault.address as Address,
+                    abi: contracts.MockRoyaltyVault.abi,
                     functionName: 'createVault',
                     args: [ipaIdBytes32],
                 });
@@ -180,26 +199,26 @@ export function useStoryProtocol() {
             // Check allowance first
             const allowance = await publicClient.readContract({
                 address: token as Address,
-                abi: CONTRACTS.MockRoyaltyToken.abi, // All ERC20s have allowance()
+                abi: contracts?.MockRoyaltyToken?.abi || [], // All ERC20s have allowance()
                 functionName: 'allowance',
-                args: [address, CONTRACTS.MockRoyaltyVault.address],
+                args: [address, contracts.MockRoyaltyVault.address],
             }) as bigint;
 
             // Only approve if needed
             if (allowance < amountWei) {
                 const approveHash = await walletClient.writeContract({
                     address: token as Address,
-                    abi: CONTRACTS.MockRoyaltyToken.abi, // All ERC20s have approve()
+                    abi: contracts?.MockRoyaltyToken?.abi || [], // All ERC20s have approve()
                     functionName: 'approve',
-                    args: [CONTRACTS.MockRoyaltyVault.address, amountWei],
+                    args: [contracts.MockRoyaltyVault.address, amountWei],
                 });
                 await publicClient.waitForTransactionReceipt({ hash: approveHash });
             }
 
             // Pay royalty
             const hash = await walletClient.writeContract({
-                address: CONTRACTS.MockRoyaltyVault.address as Address,
-                abi: CONTRACTS.MockRoyaltyVault.abi,
+                address: contracts.MockRoyaltyVault.address as Address,
+                abi: contracts.MockRoyaltyVault.abi,
                 functionName: 'payRoyalty',
                 args: [ipaIdBytes32, token, amountWei],
             });
@@ -227,9 +246,13 @@ export function useStoryProtocol() {
             // Convert string IP ID to bytes32 if needed
             const ipaIdBytes32 = ensureBytes32(ipaId);
 
+            if (!contracts?.MockRoyaltyVault) {
+                throw new Error('MockRoyaltyVault not configured for this network');
+            }
+
             const hash = await walletClient.writeContract({
-                address: CONTRACTS.MockRoyaltyVault.address as Address,
-                abi: CONTRACTS.MockRoyaltyVault.abi,
+                address: contracts.MockRoyaltyVault.address as Address,
+                abi: contracts.MockRoyaltyVault.abi,
                 functionName: 'claimRoyalty',
                 args: [ipaIdBytes32, address, token],
             });
@@ -253,9 +276,13 @@ export function useStoryProtocol() {
             // Convert string IP ID to bytes32 if needed
             const ipaIdBytes32 = ensureBytes32(ipaId);
 
+            if (!contracts?.MockRoyaltyVault) {
+                return 0n;
+            }
+
             const balance = await publicClient.readContract({
-                address: CONTRACTS.MockRoyaltyVault.address as Address,
-                abi: CONTRACTS.MockRoyaltyVault.abi,
+                address: contracts.MockRoyaltyVault.address as Address,
+                abi: contracts.MockRoyaltyVault.abi,
                 functionName: 'getRoyaltyBalance',
                 args: [ipaIdBytes32, token],
             });
@@ -269,12 +296,12 @@ export function useStoryProtocol() {
 
     // Check if IPA is locked
     const isIPALocked = useCallback(async (ipaId: string): Promise<boolean> => {
-        if (!publicClient) return false;
+        if (!publicClient || !contracts?.IP_MANAGER) return false;
         try {
             const ipaIdBytes32 = ensureBytes32(ipaId);
             const locked = await publicClient.readContract({
-                address: CONTRACTS.IP_MANAGER.address as Address,
-                abi: CONTRACTS.IP_MANAGER.abi,
+                address: contracts.IP_MANAGER.address as Address,
+                abi: contracts.IP_MANAGER.abi,
                 functionName: 'isIPALocked',
                 args: [ipaIdBytes32],
             });
@@ -287,11 +314,19 @@ export function useStoryProtocol() {
 
     // Get locked IP for user
     const getLockedIP = useCallback(async (userAddress: string): Promise<string | null> => {
-        if (!publicClient) return null;
+        if (!publicClient || !contracts?.IP_MANAGER) return null;
         try {
+            console.log('[AutonomyFinance][Story] userIPA call', {
+                // @ts-ignore - transport url access
+                rpcUrlInUse: publicClient.transport?.url || 'unknown',
+                chainId: publicClient.chain?.id,
+                contractAddress: contracts.IP_MANAGER.address,
+                userAddress,
+            });
+
             const ipaId = await publicClient.readContract({
-                address: CONTRACTS.IP_MANAGER.address as Address,
-                abi: CONTRACTS.IP_MANAGER.abi,
+                address: contracts.IP_MANAGER.address as Address,
+                abi: contracts.IP_MANAGER.abi,
                 functionName: 'userIPA', // Mapping: address => bytes32
                 args: [userAddress],
             });
@@ -328,20 +363,24 @@ export function useStoryProtocol() {
             console.log('Initiating auto-repay:', { ipaId, tokenIn, amountIn, preferredDebtAsset });
 
             // 1. Check allowance for AutoRepayEngine
+            if (!contracts?.AUTO_REPAY_ENGINE || !contracts?.MockRoyaltyToken) {
+                throw new Error('AutoRepayEngine or MockRoyaltyToken not configured for this network');
+            }
+
             const allowance = await publicClient.readContract({
                 address: tokenIn as Address,
-                abi: CONTRACTS.MockRoyaltyToken.abi, // ERC20 ABI
+                abi: contracts.MockRoyaltyToken.abi, // ERC20 ABI
                 functionName: 'allowance',
-                args: [address, CONTRACTS.AUTO_REPAY_ENGINE.address],
+                args: [address, contracts.AUTO_REPAY_ENGINE.address],
             }) as bigint;
 
             if (allowance < amountWei) {
                 console.log('Approving AutoRepayEngine...');
                 const approveHash = await walletClient.writeContract({
                     address: tokenIn as Address,
-                    abi: CONTRACTS.MockRoyaltyToken.abi,
+                    abi: contracts.MockRoyaltyToken.abi,
                     functionName: 'approve',
-                    args: [CONTRACTS.AUTO_REPAY_ENGINE.address, amountWei],
+                    args: [contracts.AUTO_REPAY_ENGINE.address, amountWei],
                 });
                 await publicClient.waitForTransactionReceipt({ hash: approveHash });
                 console.log('Approved AutoRepayEngine');
@@ -350,8 +389,8 @@ export function useStoryProtocol() {
             // 2. Call autoRepayFromRoyalty
             console.log('Calling autoRepayFromRoyalty...');
             const hash = await walletClient.writeContract({
-                address: CONTRACTS.AUTO_REPAY_ENGINE.address as Address,
-                abi: CONTRACTS.AUTO_REPAY_ENGINE.abi,
+                address: contracts.AUTO_REPAY_ENGINE.address as Address,
+                abi: contracts.AUTO_REPAY_ENGINE.abi,
                 functionName: 'autoRepayFromRoyalty',
                 args: [
                     ipaIdBytes32,

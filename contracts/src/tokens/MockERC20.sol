@@ -28,7 +28,7 @@ contract MockERC20 is ERC20, Ownable {
      * @param to Address to mint to
      * @param amount Amount to mint (in token decimals)
      */
-    function mint(address to, uint256 amount) external onlyOwner {
+    function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
 

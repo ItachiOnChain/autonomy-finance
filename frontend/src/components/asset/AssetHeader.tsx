@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAccount, usePublicClient } from 'wagmi';
-import { CONTRACTS } from '../../config/contracts';
+import { useAccount, usePublicClient, useChainId } from 'wagmi';
+import { getContracts } from '../../config/contracts';
 
 interface AssetHeaderProps {
     asset: {
@@ -16,6 +16,8 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
     const navigate = useNavigate();
     const { isConnected, address } = useAccount();
     const publicClient = usePublicClient();
+    const chainId = useChainId();
+    const contracts = getContracts(chainId);
 
     return (
         <div
@@ -98,7 +100,7 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
                                     : "Not Connected"}
                             </div>
                             <div>
-                                Pool: {CONTRACTS.LENDING_POOL.address.slice(0, 6)}...
+                                Pool: {contracts?.LENDING_POOL?.address ? `${contracts.LENDING_POOL.address.slice(0, 6)}...` : 'N/A'}
                             </div>
                         </div>
                     </div>

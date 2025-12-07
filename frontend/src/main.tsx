@@ -1,4 +1,4 @@
-import React from 'react';
+
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -12,20 +12,19 @@ import { config } from './config/wagmi';
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: '#000000',
-            accentColorForeground: 'white',
-            borderRadius: 'none',
-            fontStack: 'system',
-          })}
-        >
-          <App />
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  </React.StrictMode>,
+  // React.StrictMode removed to prevent wallet connection double-mount issues
+  <WagmiProvider config={config}>
+    <QueryClientProvider client={queryClient}>
+      <RainbowKitProvider
+        theme={darkTheme({
+          accentColor: '#000000',
+          accentColorForeground: 'white',
+          borderRadius: 'none',
+          fontStack: 'system',
+        })}
+      >
+        <App />
+      </RainbowKitProvider>
+    </QueryClientProvider>
+  </WagmiProvider>,
 );

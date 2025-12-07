@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useAccount } from "wagmi";
 import { useUserEMode, useSetUserEMode } from "../hooks/useEMode";
 import { EMODE_CATEGORIES, EMODE_CATEGORY_LABELS, ASSETS } from "../config/assets";
-import { CONTRACTS } from "../config/contracts";
-import { useUserPosition } from "../hooks/useLendingPool";
+import { useAllUserPositions } from "../hooks/useLendingPool";
 
 export const EModeToggle: React.FC = () => {
   const { address } = useAccount();
@@ -11,13 +10,9 @@ export const EModeToggle: React.FC = () => {
   const { setUserEMode, isPending } = useSetUserEMode();
   const [error, setError] = useState("");
 
-  // Call all hooks at component level (not in loops!)
-  const assetPositions = ASSETS.map(asset => {
-    const assetAddress = (CONTRACTS as any)[asset.symbol]?.address;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const position = assetAddress ? useUserPosition(assetAddress) : { supplied: 0n };
-    return { asset, supplied: position.supplied };
-  });
+  // Use the bulk hook which handles contract resolution correctly
+  // and follows hook rules (as long as ASSETS length is constant)
+  const allPositions = useAllUserPositions();
 
   // -------- DETECT USER COLLATERAL CORRECTLY ----------
   const detectUserCategory = () => {
@@ -25,18 +20,26 @@ export const EModeToggle: React.FC = () => {
 
     let hasStable = false;
     let hasETH = false;
+    let hasBTC = false;
 
-    for (const { asset, supplied } of assetPositions) {
+    for (const { asset, supplied } of allPositions) {
+      // Check if user has supplied this asset
       if (supplied > 0n) {
         if (asset.category === EMODE_CATEGORIES.STABLECOINS) hasStable = true;
         if (asset.category === EMODE_CATEGORIES.ETH) hasETH = true;
+        if (asset.category === EMODE_CATEGORIES.BTC) hasBTC = true;
       }
     }
 
+    // Priorities: Stable > ETH > BTC (Arbitrary priority if user has multiple categories)
+    // In reality, user should choose, but simple toggle assumes "Best" or first eligible.
+    // If we want to support switching between categories, UI needs dropdown.
+    // The previous code had implicit priority.
     if (hasStable) return EMODE_CATEGORIES.STABLECOINS;
     if (hasETH) return EMODE_CATEGORIES.ETH;
+    if (hasBTC) return EMODE_CATEGORIES.BTC;
 
-    return null; // no collateral
+    return null; // no eligible collateral
   };
 
   // -------- TOGGLE E-MODE LOGIC ----------
@@ -85,8 +88,8 @@ export const EModeToggle: React.FC = () => {
           />
 
           <span className="text-base font-mono tracking-wide text-white">
-  E-Mode (Unlock Maximum LTV)
-</span>
+            E-Mode (Unlock Maximum LTV)
+          </span>
 
 
           {isEModeEnabled && (
@@ -109,7 +112,7 @@ export const EModeToggle: React.FC = () => {
           <>Higher LTV enabled for {categoryLabel} assets.</>
         ) : (
           <>
-          
+
           </>
         )}
       </div>

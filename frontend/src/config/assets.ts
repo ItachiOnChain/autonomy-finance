@@ -103,32 +103,12 @@ export const ASSETS = [
         category: EMODE_CATEGORIES.DISABLED,
         canBeCollateral: true,
         color: '#B6509E'
-    },
-    {
-        symbol: 'ATUSD',
-        name: 'Autonomy USD',
-        decimals: 18,
-        logo: '🏦',
-        maxLTV: 0,
-        eModeLTV: 0,
-        category: EMODE_CATEGORIES.DISABLED,
-        canBeCollateral: false,
-        color: '#00D4AA'
-    },
-    {
-        symbol: 'TEST',
-        name: 'Test Token',
-        decimals: 18,
-        logo: '🧪',
-        maxLTV: 50,
-        eModeLTV: 50,
-        category: EMODE_CATEGORIES.DISABLED,
-        canBeCollateral: true,
-        color: '#888888'
     }
 ] as const;
 
-export type AssetSymbol = typeof ASSETS[number]['symbol'];
+export type Asset = typeof ASSETS[number];
+export type AssetSymbol = Asset['symbol'];
+
 
 export function getAssetBySymbol(symbol: string) {
     return ASSETS.find(a => a.symbol === symbol);

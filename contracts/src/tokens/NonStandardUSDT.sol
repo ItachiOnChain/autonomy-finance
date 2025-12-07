@@ -19,7 +19,7 @@ contract NonStandardUSDT is Ownable {
 
     constructor() Ownable(msg.sender) {}
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public {
         balanceOf[to] += amount;
         totalSupply += amount;
     }

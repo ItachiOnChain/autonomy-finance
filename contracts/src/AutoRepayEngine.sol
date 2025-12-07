@@ -387,11 +387,15 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
         }
 
         // Execute repayment to appropriate system
+        uint256 surplus = 0;
+
+        // Execute repayment to appropriate system
         if (hasVaultDebt) {
             // Repay to AutonomyVault
 
-            // Cap repay amount to debt
+            // Cap repay amount to debt and calculate surplus
             if (repayAmount > vaultPos.debtAmount) {
+                surplus = repayAmount - vaultPos.debtAmount;
                 repayAmount = vaultPos.debtAmount;
             }
 
@@ -409,13 +413,12 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
             if (updatedPos.debtAmount == 0) {
                 emit IPReleased(owner, address(uint160(uint256(ipaId))));
             }
-
-            return repayAmount;
         } else {
             // Repay to LendingPool
 
-            // Cap repay amount to debt
+            // Cap repay amount to debt and calculate surplus
             if (repayAmount > debtAmount) {
+                surplus = repayAmount - debtAmount;
                 repayAmount = debtAmount;
             }
 
@@ -424,9 +427,14 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
             lendingPool.repayOnBehalf(debtAsset, repayAmount, owner);
 
             emit LendingPoolRepaySucceeded(owner, debtAsset, repayAmount);
-
-            return repayAmount;
         }
+
+        // Return surplus to user
+        if (surplus > 0) {
+            IERC20(targetToken).safeTransfer(owner, surplus);
+        }
+
+        return repayAmount;
     }
 
     /**

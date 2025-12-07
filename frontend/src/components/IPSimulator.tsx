@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStoryProtocol } from "../hooks/useStoryProtocol";
-import { CONTRACTS } from "../config/contracts";
+import { getContracts, MARKET_CHAIN_ID } from "../config/contracts";
 
 interface IPSimulatorProps {
   onRoyaltyPaid?: () => void;
@@ -11,10 +11,23 @@ export function IPSimulator({ onRoyaltyPaid }: IPSimulatorProps) {
 
   const [ipaId, setIpaId] = useState("");
   const [amount, setAmount] = useState("");
+
+  // Get contracts for MARKET chain
+  const contracts = getContracts(MARKET_CHAIN_ID);
+  const MockRoyaltyToken = contracts?.MockRoyaltyToken;
+
   const [selectedToken, setSelectedToken] = useState<string>(
-    CONTRACTS.MockRoyaltyToken.address
+    MockRoyaltyToken?.address || ""
   );
   const [success, setSuccess] = useState("");
+
+  if (!MockRoyaltyToken) {
+    return (
+      <div className="text-white/50 text-sm">
+        MockRoyaltyToken not available on this network
+      </div>
+    );
+  }
 
   const handlePayRoyalty = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +128,7 @@ export function IPSimulator({ onRoyaltyPaid }: IPSimulatorProps) {
               outline-none transition
             "
           >
-            <option value={CONTRACTS.MockRoyaltyToken.address}>
+            <option value={MockRoyaltyToken.address}>
               MOCK Token
             </option>
           </select>

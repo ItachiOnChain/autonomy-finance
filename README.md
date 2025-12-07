@@ -21,6 +21,30 @@ A decentralized lending and borrowing protocol with **Story Protocol IP Collater
 - **MetaMask**: Browser wallet extension
 
 ## Quick Start (5 Minutes)
+
+### Local Development (Anvil)
+
+**Terminal 1 - Start Local Blockchain:**
+```bash
+npm run chain
+```
+
+**Terminal 2 - Deploy Contracts:**
+```bash
+./scripts/deploy-local.sh
+```
+
+This will:
+- ✅ Deploy all contracts to Anvil
+- ✅ Configure token conversion router
+- ✅ Sync ABIs to frontend
+
+**Expected output:**
+```
+🚀 Phase 1: Deploying Story Protocol Simulator (Local)
+✅ Deployment successful!
+🎉 Sync complete!
+```
 - ✅ Configure token conversion router
 - ✅ Sync ABIs to frontend
 
@@ -54,9 +78,186 @@ Open **http://localhost:5173** in your browser.
    - Paste: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
    - This account has 10,000 ETH and all test tokens
 
-3. **Connect to App**:
-   - Click "Connect Wallet" in the app
-   - Approve the connection
+## Supported Networks
+
+Autonomy Finance supports the following networks:
+
+| Network | Chain ID | RPC URL | Explorer | Status |
+|---------|----------|---------|----------|--------|
+| **Anvil Local** | 31337 | http://localhost:8545 | N/A | ✅ Active |
+| **Story Aeneid Testnet** | 1315 | https://aeneid.storyrpc.io | https://aeneid.storyscan.io | ✅ Active |
+
+---
+
+## Story Aeneid Testnet Deployment
+
+### Prerequisites
+
+1. **Get Testnet IP Tokens**:
+   - Visit Story Aeneid faucet (contact Story Protocol team)
+   - You'll need ~0.5 IP for deployment
+
+2. **Prepare Deployer Wallet**:
+   - Create a new wallet or use existing testnet wallet
+   - **NEVER use mainnet private keys**
+   - Export private key (without 0x prefix)
+
+### Deployment Steps
+
+#### 1. Configure Environment
+
+Create a `.env` file in the project root:
+
+```bash
+cp .env.example .env
+```
+
+Update the following variables:
+
+```bash
+# Story Aeneid Testnet
+STORY_RPC_URL="https://aeneid.storyrpc.io"
+STORY_PRIVATE_KEY="your_private_key_here_without_0x_prefix"
+```
+
+> [!WARNING]
+> **Never commit your `.env` file to git!** It contains sensitive private keys.
+
+#### 2. Verify RPC Connection
+
+Test connectivity to Story Aeneid:
+
+```bash
+cast block-number --rpc-url https://aeneid.storyrpc.io
+```
+
+Expected output: Current block number (e.g., `12345678`)
+
+#### 3. Check Deployer Balance
+
+```bash
+# Get your deployer address
+cast wallet address --private-key $STORY_PRIVATE_KEY
+
+# Check balance
+cast balance YOUR_ADDRESS --rpc-url https://aeneid.storyrpc.io
+```
+
+Ensure you have at least **0.5 IP** for deployment.
+
+#### 4. Deploy Contracts
+
+Run the deployment script:
+
+```bash
+./scripts/deploy-story-aeneid.sh
+```
+
+The script will:
+- ✅ Validate environment variables
+- ✅ Check RPC connectivity
+- ✅ Verify deployer balance
+- ✅ Deploy all contracts to Story Aeneid
+- ✅ Configure lending pool and E-Mode
+- ✅ Sync ABIs to frontend
+
+**Expected output:**
+```
+================================================
+  Story Aeneid Testnet Deployment
+================================================
+
+✅ Environment variables loaded
+✅ RPC connection successful
+📍 Deployer address: 0x...
+💰 Deployer balance: 1.5 IP
+
+🚀 Starting deployment to Story Aeneid...
+
+Deploying Mock Tokens...
+  USDC deployed at: 0x...
+  USDT deployed at: 0x...
+  ...
+
+✅ Deployment successful!
+🔄 Syncing frontend with deployed contracts...
+
+================================================
+  ✅ DEPLOYMENT COMPLETE
+================================================
+```
+
+#### 5. Verify Deployment
+
+Check deployed contracts on Story Aeneid explorer:
+
+```
+https://aeneid.storyscan.io/address/YOUR_DEPLOYER_ADDRESS
+```
+
+### Permanent Contract Addresses
+
+These addresses are **permanently deployed** on Story Aeneid testnet and used by the frontend:
+
+| Contract | Story Aeneid Address | Description |
+|----------|---------------------|-------------|
+| **Core Contracts** | | |
+| LendingPool | `0xf342e904702b1d021f03f519d6d9614916b03f37` | Main lending/borrowing pool |
+| PriceOracle | `0x2a590c461db46bca129e8dbe5c3998a8ff402e76` | Asset price oracle |
+| InterestRateModel | `0x2f54d1563963fc04770e85af819c89dc807f6a06` | Interest rate calculator |
+| **Autonomy System** | | |
+| AutonomyVault | `0x8e45c0936fa1a65bdad3222befec6a03c83372ce` | Collateral vault |
+| IPManager | `0xbee6ffc1e8627f51ccdf0b4399a1e1abc5165f15` | IP asset manager |
+| AutoRepayEngine | `0xc32609c91d6b6b51d48f2611308fef121b02041f` | Royalty-based auto-repay |
+| **Tokens** | | |
+| USDC | `0x70e5370b8981abc6e14c91f4ace823954efc8ea3` | Mock USDC (6 decimals) |
+| USDT | `0x4000f8820522ac96c4221b299876e3e53bcc8525` | Mock USDT (6 decimals) |
+| WETH | `0x9338ca7d556248055f5751d85cda7ad6ef254433` | Mock WETH (18 decimals) |
+| WBTC | `0x9c65f85425c619a6cb6d29ff8d57ef696323d188` | Mock WBTC (8 decimals) |
+| DAI | `0x7cf4be31f546c04787886358b9486ca3d62b9acf` | Mock DAI (18 decimals) |
+| LINK | `0x33e45b187da34826abceda1039231be46f1b05af` | Mock LINK (18 decimals) |
+| UNI | `0x0c626fc4a447b01554518550e30600136864640b` | Mock UNI (18 decimals) |
+| AAVE | `0xa21ddc1f17df41589bc6a5209292aed2df61cc94` | Mock AAVE (18 decimals) |
+| **Mocks** | | |
+| MockRoyaltyToken | `0x24d41dbc3d60d0784f8a937c59fbde51440d5140` | Mock royalty token |
+| MockIPAssetRegistry | `0xfd6d23ee2b6b136e34572fc80cbcd33e9787705e` | Mock Story Protocol IP registry |
+| MockRoyaltyVault | `0x4daf17c8142a483b2e2348f56ae0f2cfdae22cee` | Mock royalty vault |
+| MockRoyaltyModule | `0x1d13ff25b10c9a6741dfdce229073bed652197c7` | Mock royalty module |
+| MockUniswapRouter | `0xc976c932092eccd8f328ffd85066c0c05ed54044` | Mock DEX router |
+
+> [!NOTE]
+> **Deployed on**: December 6, 2025  
+> **Deployer**: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  
+> **Total Cost**: 0.444 IP  
+> **View on Explorer**: [Story Aeneid Explorer](https://aeneid.storyscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+
+### Frontend Integration
+
+After deployment, the frontend automatically loads the correct contracts based on chain ID:
+
+```typescript
+import { getContracts } from './config/contracts';
+
+// Automatically uses correct addresses for current network
+const contracts = getContracts(chainId); // 1315 for Story Aeneid
+```
+
+### Configure MetaMask
+
+Add Story Aeneid network to MetaMask:
+
+1. **Open MetaMask** → Networks → Add Network
+2. **Enter Network Details**:
+   - Network Name: `Story Aeneid Testnet`
+   - RPC URL: `https://aeneid.storyrpc.io`
+   - Chain ID: `1315`
+   - Currency Symbol: `IP`
+   - Block Explorer: `https://aeneid.storyscan.io`
+3. **Save** and switch to Story Aeneid network
+
+---
+
+## Local Development Setup
 
 ## Testing the Full Flow
 
@@ -167,22 +368,272 @@ npm run lint
 
 ## Troubleshooting
 
-### "Contract not deployed" error
-**Solution:** Run `./scripts/deploy_local.sh` again.
+### Story Aeneid Deployment Issues
 
-### White screen / blank page
+#### ❌ Insufficient IP Balance
+
+**Error:**
+```
+Error: insufficient funds for gas * price + value
+```
+
+**Solution:**
+1. Check your deployer balance:
+   ```bash
+   cast balance YOUR_ADDRESS --rpc-url https://aeneid.storyrpc.io
+   ```
+2. Get testnet IP from Story Aeneid faucet
+3. Ensure you have at least **0.5 IP** before deploying
+
+---
+
+#### ❌ RPC Connection Errors
+
+**Error:**
+```
+Error: failed to get chain id: connection refused
+Error: timeout waiting for response
+```
+
+**Solutions:**
+1. **Check internet connection**
+2. **Verify RPC URL** in `.env`:
+   ```bash
+   STORY_RPC_URL="https://aeneid.storyrpc.io"
+   ```
+3. **Test connectivity**:
+   ```bash
+   cast block-number --rpc-url https://aeneid.storyrpc.io
+   ```
+4. **Rate limiting**: Wait a few minutes and retry
+5. **Try alternative RPC** (if available from Story Protocol team)
+
+---
+
+#### ❌ Constructor Revert / Deployment Failure
+
+**Error:**
+```
+Error: contract deployment failed
+Revert reason: <empty or cryptic message>
+```
+
+**Solutions:**
+1. **Check constructor parameters** in `DeployStoryAeneid.s.sol`
+2. **Verify dependency addresses** (e.g., InterestRateModel address passed to LendingPool)
+3. **Review deployment logs** for the specific contract that failed
+4. **Increase gas limit**:
+   ```bash
+   forge script script/DeployStoryAeneid.s.sol:DeployStoryAeneid \
+     --rpc-url $STORY_RPC_URL \
+     --private-key $STORY_PRIVATE_KEY \
+     --broadcast \
+     --gas-limit 10000000
+   ```
+
+---
+
+#### ❌ Gas Estimation Failure
+
+**Error:**
+```
+Error: failed to estimate gas
+```
+
+**Solutions:**
+1. **Use legacy transactions**:
+   ```bash
+   forge script script/DeployStoryAeneid.s.sol:DeployStoryAeneid \
+     --rpc-url $STORY_RPC_URL \
+     --private-key $STORY_PRIVATE_KEY \
+     --broadcast \
+     --legacy
+   ```
+2. **Manually set gas price**:
+   ```bash
+   --gas-price 1000000000  # 1 gwei
+   ```
+3. **Check RPC is not rate limiting**
+
+---
+
+#### ❌ Private Key Issues
+
+**Error:**
+```
+Error: invalid private key
+Error: could not decode private key
+```
+
+**Solutions:**
+1. **Remove 0x prefix** from private key in `.env`:
+   ```bash
+   # ❌ Wrong
+   STORY_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+   
+   # ✅ Correct
+   STORY_PRIVATE_KEY="ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+   ```
+2. **Verify key length** (64 characters without 0x)
+3. **Check for extra spaces** or newlines
+
+---
+
+### Frontend Issues
+
+#### ❌ "Contract not deployed" error
+
+**Solution:**
+1. **For Anvil**: Run `./scripts/deploy-local.sh` again
+2. **For Story Aeneid**: Verify deployment completed successfully
+3. **Check network**: Ensure MetaMask is on correct network (31337 or 1315)
+4. **Verify contract addresses** in `frontend/src/config/contracts.ts`
+
+---
+
+#### ❌ Frontend not showing Story Aeneid contracts
+
+**Error:**
+Frontend shows "No contracts found" or uses wrong addresses
+
+**Solutions:**
+1. **Re-sync frontend**:
+   ```bash
+   node scripts/sync-frontend.js --network=storyAeneid
+   ```
+2. **Verify `contracts.ts`** contains chainId 1315:
+   ```typescript
+   export const CONTRACTS = {
+       1315: { // Story Aeneid
+           LENDING_POOL: { address: "0x...", ... },
+           ...
+       }
+   }
+   ```
+3. **Clear browser cache**: Hard refresh (Ctrl+Shift+R)
+4. **Restart frontend**:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+---
+
+#### ❌ White screen / blank page
+
 **Solution:** 
 1. Check Anvil is running (`npm run chain`)
 2. Redeploy contracts
 3. Hard refresh browser (Ctrl+Shift+R)
+4. Check browser console for errors (F12)
 
-### MetaMask transaction fails
+---
+
+#### ❌ MetaMask transaction fails
+
 **Solution:**
-1. Reset account: MetaMask → Settings → Advanced → Reset Account
-2. This clears the nonce cache
+1. **Reset account nonce**: MetaMask → Settings → Advanced → Reset Account
+2. **Check network**: Ensure MetaMask is on correct network
+3. **Verify gas settings**: Use default gas settings
+4. **Check balance**: Ensure you have enough ETH/IP for gas
 
-### "Insufficient balance" error
-**Solution:** You're using the wrong account. Import the test account with the private key above.
+---
+
+#### ❌ "Insufficient balance" error
+
+**Solution:** 
+You're using the wrong account. 
+
+**For Anvil:**
+Import the test account with private key:
+```
+0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+
+**For Story Aeneid:**
+1. Ensure your wallet has testnet IP tokens
+2. Get tokens from Story Aeneid faucet
+
+---
+
+#### ❌ Wrong network detected
+
+**Error:**
+Frontend shows "Please connect to Story Aeneid" but you're already connected
+
+**Solutions:**
+1. **Disconnect and reconnect** wallet in app
+2. **Switch networks** in MetaMask:
+   - For local: Localhost 8545 (Chain ID 31337)
+   - For testnet: Story Aeneid (Chain ID 1315)
+3. **Clear MetaMask cache**: Settings → Advanced → Clear activity tab data
+4. **Restart browser**
+
+---
+
+### Contract Interaction Issues
+
+#### ❌ "Execution reverted" errors
+
+**Common causes:**
+1. **Insufficient allowance**: Approve tokens before supplying/borrowing
+2. **Insufficient collateral**: Supply collateral before borrowing
+3. **Health factor too low**: Cannot borrow more without additional collateral
+4. **Asset not initialized**: Check asset is configured in lending pool
+
+**Debug steps:**
+1. Check transaction details in block explorer
+2. Review contract state using `cast` commands
+3. Verify token balances and allowances
+4. Check lending pool reserves
+
+---
+
+### Development Issues
+
+#### ❌ Foundry compilation errors
+
+**Solution:**
+```bash
+cd contracts
+forge clean
+forge build
+```
+
+#### ❌ Frontend TypeScript errors
+
+**Solution:**
+```bash
+cd frontend
+npm run build  # Check for type errors
+```
+
+#### ❌ ABI sync issues
+
+**Solution:**
+```bash
+# For Anvil
+node scripts/sync-frontend.js
+
+# For Story Aeneid
+node scripts/sync-frontend.js --network=storyAeneid
+```
+
+---
+
+### Getting Help
+
+If you're still experiencing issues:
+
+1. **Check deployment logs** for specific error messages
+2. **Verify all prerequisites** are met (Node.js, Foundry, etc.)
+3. **Review contract addresses** on block explorer
+4. **Test with minimal example** (single token supply/borrow)
+5. **Open an issue** on GitHub with:
+   - Error message
+   - Steps to reproduce
+   - Network (Anvil or Story Aeneid)
+   - Transaction hash (if applicable)
 
 ## Advanced
 

@@ -11,18 +11,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract CollateralToken is ERC20, Ownable {
     constructor() ERC20("Autonomy Collateral", "aCOL") Ownable(msg.sender) {
         // Mint initial supply to deployer
-        _mint(msg.sender, 1_000_000 * 10**18);
+        _mint(msg.sender, 1_000_000 * 10 ** 18);
     }
-    
+
     /**
      * @notice Mint tokens to an address (for testing)
      * @param to Address to mint to
      * @param amount Amount to mint
      */
-    function mint(address to, uint256 amount) external onlyOwner {
+    function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
-    
+
     /**
      * @notice Burn tokens from an address (for testing)
      * @param from Address to burn from

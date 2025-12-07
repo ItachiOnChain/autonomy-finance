@@ -12,7 +12,7 @@ export const Core: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full text-white"
+      className="min-h-screen w-full text-white flex flex-col"
       style={{
         backgroundColor: "#02060b",
         backgroundImage: `
@@ -35,7 +35,7 @@ export const Core: React.FC = () => {
       </div>
 
       {/* ================= BODY ================= */}
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16">
+      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16 flex-1">
 
         {/* USER POSITIONS (ONLY IF WALLET CONNECTED) */}
         {isConnected && (
@@ -117,6 +117,8 @@ export const Core: React.FC = () => {
         )}
 
       </div>
+
+      {/* ================= COMPACT DASHBOARD FOOTER ================= */}
     </div>
   );
 };
