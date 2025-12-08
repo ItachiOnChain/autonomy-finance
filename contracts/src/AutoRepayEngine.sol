@@ -438,6 +438,148 @@ contract AutoRepayEngine is IAutoRepayEngine, Ownable, ReentrancyGuard {
     }
 
     /**
+     * @notice Auto-repay from royalty (direct call from MockRoyaltyVault)
+     * @dev Called automatically when royalties are paid to a locked IP with active debt
+     * @param ipaId IPA ID
+     * @param owner IP owner address
+     * @param token Royalty token address
+     * @param amount Royalty amount
+     * @return used Amount used for debt repayment
+     * @return surplus Amount not used (to be returned to vault)
+     */
+    function autoRepayFromRoyaltyDirect(
+        bytes32 ipaId,
+        address owner,
+        address token,
+        uint256 amount
+    ) external nonReentrant returns (uint256 used, uint256 surplus) {
+        require(amount > 0, "Amount must be > 0");
+
+        // Pull tokens from caller (MockRoyaltyVault)
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+
+        // Get position from vault
+        IAutonomyVault.Position memory vaultPos = vault.getPosition(owner);
+        bool hasVaultDebt = vaultPos.debtAmount > 0;
+
+        // If no vault debt, scan LendingPool for borrowed assets
+        address debtAsset = address(0);
+        uint256 debtAmount = 0;
+
+        if (!hasVaultDebt && address(lendingPool) != address(0)) {
+            // Scan all supported assets for debt
+            for (uint i = 0; i < supportedAssets.length; i++) {
+                ILendingPool.UserPosition memory lpPos = lendingPool
+                    .getUserPosition(owner, supportedAssets[i]);
+
+                if (lpPos.borrowed > 0) {
+                    debtAsset = supportedAssets[i];
+                    debtAmount = lpPos.borrowed;
+                    break; // Use first found debt asset
+                }
+            }
+
+            if (debtAsset == address(0)) {
+                // No debt found - return all as surplus
+                IERC20(token).safeTransfer(msg.sender, amount);
+                return (0, amount);
+            }
+        } else if (!hasVaultDebt) {
+            // No debt found - return all as surplus
+            IERC20(token).safeTransfer(msg.sender, amount);
+            return (0, amount);
+        }
+
+        emit RoyaltyRepayInitiated(owner, ipaId, token, amount);
+
+        // Determine target token for conversion
+        address targetToken = hasVaultDebt ? repayToken : debtAsset;
+
+        uint256 repayAmount;
+        uint256 fee;
+
+        // If token is same as target token, no conversion needed
+        if (token == targetToken) {
+            repayAmount = amount;
+        } else {
+            // Check if token is whitelisted
+            if (!whitelistedTokens[token]) {
+                // Token not whitelisted - return as surplus
+                IERC20(token).safeTransfer(msg.sender, amount);
+                emit OffChainConversionRequired(owner, ipaId, token, amount);
+                return (0, amount);
+            }
+
+            // Convert tokens with minimal slippage (1%)
+            // Note: If conversion fails, transaction will revert and royalty stays in vault
+            (repayAmount, fee) = _convertTokens(
+                token,
+                targetToken,
+                amount,
+                0, // minOut will be calculated in _convertTokens
+                100 // 1% slippage
+            );
+        }
+
+        // Deduct conversion fee
+        if (fee > 0 && treasury != address(0)) {
+            IERC20(targetToken).safeTransfer(treasury, fee);
+            repayAmount -= fee;
+        }
+
+        // Execute repayment to appropriate system
+        uint256 actualRepaid = 0;
+
+        if (hasVaultDebt) {
+            // Repay to AutonomyVault
+            if (repayAmount > vaultPos.debtAmount) {
+                actualRepaid = vaultPos.debtAmount;
+                surplus = repayAmount - vaultPos.debtAmount;
+            } else {
+                actualRepaid = repayAmount;
+                surplus = 0;
+            }
+
+            vault.reduceDebt(owner, actualRepaid);
+
+            IAutonomyVault.Position memory updatedPos = vault.getPosition(
+                owner
+            );
+            emit RoyaltyRepaySucceeded(
+                owner,
+                actualRepaid,
+                updatedPos.debtAmount
+            );
+
+            if (updatedPos.debtAmount == 0) {
+                emit IPReleased(owner, address(uint160(uint256(ipaId))));
+            }
+        } else {
+            // Repay to LendingPool
+            if (repayAmount > debtAmount) {
+                actualRepaid = debtAmount;
+                surplus = repayAmount - debtAmount;
+            } else {
+                actualRepaid = repayAmount;
+                surplus = 0;
+            }
+
+            // Approve and repay on behalf of user
+            IERC20(debtAsset).forceApprove(address(lendingPool), actualRepaid);
+            lendingPool.repayOnBehalf(debtAsset, actualRepaid, owner);
+
+            emit LendingPoolRepaySucceeded(owner, debtAsset, actualRepaid);
+        }
+
+        // Return surplus to caller (MockRoyaltyVault)
+        if (surplus > 0) {
+            IERC20(targetToken).safeTransfer(msg.sender, surplus);
+        }
+
+        return (actualRepaid, surplus);
+    }
+
+    /**
      * @notice Convert tokens using Uniswap router
      * @param tokenIn Input token
      * @param tokenOut Output token

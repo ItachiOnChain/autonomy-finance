@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IIPManager.sol";
 import "./interfaces/IAutonomyVault.sol";
+import "./interfaces/ILendingPool.sol";
 import "./libraries/Errors.sol";
 
 /**
@@ -14,6 +15,7 @@ import "./libraries/Errors.sol";
  */
 contract IPManager is IIPManager, Ownable, ReentrancyGuard {
     IAutonomyVault public vault;
+    ILendingPool public lendingPool;
     address public autoRepayEngine;
 
     // ===== IPA Collateral Registry =====
@@ -65,6 +67,15 @@ contract IPManager is IIPManager, Ownable, ReentrancyGuard {
     function setAutoRepayEngine(address _autoRepayEngine) external onlyOwner {
         if (_autoRepayEngine == address(0)) revert Errors.ZeroAddress();
         autoRepayEngine = _autoRepayEngine;
+    }
+
+    /**
+     * @notice Set the lending pool contract
+     * @param _lendingPool Address of LendingPool contract
+     */
+    function setLendingPool(address _lendingPool) external onlyOwner {
+        if (_lendingPool == address(0)) revert Errors.ZeroAddress();
+        lendingPool = ILendingPool(_lendingPool);
     }
 
     // ===== IPA Collateral Registry Functions =====
@@ -376,5 +387,31 @@ contract IPManager is IIPManager, Ownable, ReentrancyGuard {
      */
     function isIPLocked(address user) external view returns (bool) {
         return lockedIP[user] != address(0);
+    }
+
+    /**
+     * @notice Check if user has active debt in AutonomyVault or LendingPool
+     * @dev This is a simplified check - AutoRepayEngine will do comprehensive debt scanning
+     * @param user User address
+     * @return hasDebt True if user has any active debt
+     */
+    function hasActiveDebt(address user) external view returns (bool) {
+        // Check AutonomyVault debt
+        if (address(vault) != address(0)) {
+            IAutonomyVault.Position memory position = vault.getPosition(user);
+            if (position.debtAmount > 0) {
+                return true;
+            }
+        }
+
+        // Check LendingPool debt - use total debt value
+        if (address(lendingPool) != address(0)) {
+            uint256 totalDebt = lendingPool.getUserTotalDebtValue(user);
+            if (totalDebt > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

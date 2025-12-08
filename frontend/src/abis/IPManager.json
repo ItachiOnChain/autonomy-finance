@@ -197,6 +197,25 @@
   },
   {
     "type": "function",
+    "name": "hasActiveDebt",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "ipaCollateralValue",
     "inputs": [
       {
@@ -292,6 +311,19 @@
   },
   {
     "type": "function",
+    "name": "lendingPool",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ILendingPool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "lockIPA",
     "inputs": [
       {
@@ -376,6 +408,19 @@
     "inputs": [
       {
         "name": "_autoRepayEngine",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setLendingPool",
+    "inputs": [
+      {
+        "name": "_lendingPool",
         "type": "address",
         "internalType": "address"
       }

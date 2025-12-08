@@ -202,33 +202,33 @@ These addresses are **permanently deployed** on Story Aeneid testnet and used by
 | Contract | Story Aeneid Address | Description |
 |----------|---------------------|-------------|
 | **Core Contracts** | | |
-| LendingPool | `0xf342e904702b1d021f03f519d6d9614916b03f37` | Main lending/borrowing pool |
-| PriceOracle | `0x2a590c461db46bca129e8dbe5c3998a8ff402e76` | Asset price oracle |
-| InterestRateModel | `0x2f54d1563963fc04770e85af819c89dc807f6a06` | Interest rate calculator |
+| LendingPool | `0x3358F984e9B3CBBe976eEFE9B6fb92a214162932` | Main lending/borrowing pool |
+| PriceOracle | `0x69eB226983E10D7318816134cd44BE3023dC74cd` | Asset price oracle |
+| InterestRateModel | `0xD8fE7c45330c8b12cA0D4728D75557b9e7BeB24F` | Interest rate calculator |
 | **Autonomy System** | | |
-| AutonomyVault | `0x8e45c0936fa1a65bdad3222befec6a03c83372ce` | Collateral vault |
-| IPManager | `0xbee6ffc1e8627f51ccdf0b4399a1e1abc5165f15` | IP asset manager |
-| AutoRepayEngine | `0xc32609c91d6b6b51d48f2611308fef121b02041f` | Royalty-based auto-repay |
+| AutonomyVault | `0x95D7fF1684a8F2e202097F28Dc2e56F773A55D02` | Collateral vault |
+| IPManager | `0x897945A56464616a525C9e5F11a8D400a72a8f3A` | IP asset manager |
+| AutoRepayEngine | `0x633a7eB9b8912b22f3616013F3153de687F96074` | Royalty-based auto-repay |
 | **Tokens** | | |
-| USDC | `0x70e5370b8981abc6e14c91f4ace823954efc8ea3` | Mock USDC (6 decimals) |
-| USDT | `0x4000f8820522ac96c4221b299876e3e53bcc8525` | Mock USDT (6 decimals) |
-| WETH | `0x9338ca7d556248055f5751d85cda7ad6ef254433` | Mock WETH (18 decimals) |
-| WBTC | `0x9c65f85425c619a6cb6d29ff8d57ef696323d188` | Mock WBTC (8 decimals) |
-| DAI | `0x7cf4be31f546c04787886358b9486ca3d62b9acf` | Mock DAI (18 decimals) |
-| LINK | `0x33e45b187da34826abceda1039231be46f1b05af` | Mock LINK (18 decimals) |
-| UNI | `0x0c626fc4a447b01554518550e30600136864640b` | Mock UNI (18 decimals) |
-| AAVE | `0xa21ddc1f17df41589bc6a5209292aed2df61cc94` | Mock AAVE (18 decimals) |
+| USDC | `0x43c5DF0c482c88Cef8005389F64c362eE720A5bC` | Mock USDC (6 decimals) |
+| USDT | `0x2098cb47B17082Ab6969FB2661f2759A9BF357c4` | Mock USDT (6 decimals) |
+| WETH | `0xF01f4567586c3A707EBEC87651320b2dd9F4A287` | Mock WETH (18 decimals) |
+| WBTC | `0x2B07F89c9F574a890F5B8b7FddAfbBaE40f6Fde2` | Mock WBTC (8 decimals) |
+| DAI | `0xCaC60200c1Cb424f2C1e438c7Ee1B98d487f0254` | Mock DAI (18 decimals) |
+| LINK | `0xABc84968376556B5e5B3C3bda750D091a06De536` | Mock LINK (18 decimals) |
+| UNI | `0xFf8FA9381caf61cB3368a6ec0b3F5C788028D0Cd` | Mock UNI (18 decimals) |
+| AAVE | `0xE55cc27460B55c8aC7E73043F38b537758C9E51e` | Mock AAVE (18 decimals) |
 | **Mocks** | | |
-| MockRoyaltyToken | `0x24d41dbc3d60d0784f8a937c59fbde51440d5140` | Mock royalty token |
-| MockIPAssetRegistry | `0xfd6d23ee2b6b136e34572fc80cbcd33e9787705e` | Mock Story Protocol IP registry |
-| MockRoyaltyVault | `0x4daf17c8142a483b2e2348f56ae0f2cfdae22cee` | Mock royalty vault |
-| MockRoyaltyModule | `0x1d13ff25b10c9a6741dfdce229073bed652197c7` | Mock royalty module |
-| MockUniswapRouter | `0xc976c932092eccd8f328ffd85066c0c05ed54044` | Mock DEX router |
+| MockRoyaltyToken | `0x5aA185fbEFc205072FaecC6B9D564383e761f8C2` | Mock royalty token |
+| MockIPAssetRegistry | `0xA4f9885550548c6a45b9D18C57B114c06f3c39B8` | Mock Story Protocol IP registry |
+| MockRoyaltyVault | `0x886a2A3ABF5B79AA5dFF1C73016BD07CFc817e04` | Mock royalty vault |
+| MockRoyaltyModule | `0x449C286Ab90639fd9F6604F4f15Ec86bce2b8A61` | Mock royalty module |
+| MockUniswapRouter | `0x63275D081C4A77AE69f76c4952F9747a5559a519` | Mock DEX router |
 
 > [!NOTE]
-> **Deployed on**: December 6, 2025  
+> **Deployed on**: December 8, 2024  
 > **Deployer**: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  
-> **Total Cost**: 0.444 IP  
+> **Total Cost**: 0.623 IP  
 > **View on Explorer**: [Story Aeneid Explorer](https://aeneid.storyscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
 
 ### Frontend Integration

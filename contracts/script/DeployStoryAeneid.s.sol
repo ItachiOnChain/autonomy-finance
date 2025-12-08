@@ -240,7 +240,8 @@ contract DeployStoryAeneid is Script {
         // IPManager dependencies
         ipManager.setVault(address(vault));
         ipManager.setAutoRepayEngine(address(autoRepayEngine));
-        console.log("    IPManager -> Vault, AutoRepayEngine");
+        ipManager.setLendingPool(address(lendingPool)); // NEW: For hasActiveDebt check
+        console.log("    IPManager -> Vault, AutoRepayEngine, LendingPool");
 
         // AutoRepayEngine dependencies
         autoRepayEngine.setVault(address(vault));
@@ -277,6 +278,14 @@ contract DeployStoryAeneid is Script {
 
         mockRoyaltyModule = new MockRoyaltyModule();
         _logDeploymentSuccess("MockRoyaltyModule", address(mockRoyaltyModule));
+        console.log("");
+
+        // NEW: Wire MockRoyaltyVault for automatic routing
+        console.log("  Configuring automatic royalty routing...");
+        mockRoyaltyVault.setIPManager(address(ipManager));
+        mockRoyaltyVault.setAutoRepayEngine(address(autoRepayEngine));
+        console.log("    MockRoyaltyVault -> IPManager, AutoRepayEngine");
+        console.log("    [OK] Automatic royalty routing ENABLED!");
         console.log("");
 
         // 7. Deploy Mock Royalty Token
