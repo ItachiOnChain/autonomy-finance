@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "../src/LendingPool.sol";
 import "../src/AutonomyVault.sol";
 import "../src/IPManager.sol";
-import "../src/AutoRepayEngine.sol";
+import "../src/story/AutoRepayEngine.sol";
 import "../src/InterestRateModel.sol";
 import "../src/PriceOracle.sol";
 import "../src/tokens/USDC.sol";

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
-import "../src/AutoRepayEngine.sol";
+import "../src/story/AutoRepayEngine.sol";
 import "../src/AutonomyVault.sol";
 import "../src/IPManager.sol";
 import "../src/CollateralToken.sol";

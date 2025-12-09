@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "forge-std/Script.sol";
+import "../src/story/StoryRoyaltySimulator.sol";
+import "../src/tokens/MockRoyaltyToken.sol";
+
+/**
+ * @title DeployStoryRoyaltyWithRealContracts
+ * @notice Deploy StoryRoyaltySimulator with actual deployed contract addresses on Aeneid
+ */
+contract DeployStoryRoyaltyWithRealContracts is Script {
+    // Deployed contract addresses on Story Aeneid (from frontend config)
+    address constant LENDING_POOL = 0x3358F984e9B3CBBe976eEFE9B6fb92a214162932;
+    address constant AUTONOMY_VAULT =
+        0x95D7fF1684a8F2e202097F28Dc2e56F773A55D02;
+    address constant AUTO_REPAY_ENGINE =
+        0x633a7eB9b8912b22f3616013F3153de687F96074;
+
+    function run() external {
+        vm.startBroadcast();
+
+        address deployer = msg.sender;
+        console.log("Deploying from:", deployer);
+        console.log("Network: Story Aeneid Testnet (Chain ID: 1315)");
+        console.log("");
+
+        // Deploy MockRoyaltyToken
+        console.log("Deploying MockRoyaltyToken...");
+        MockRoyaltyToken royaltyToken = new MockRoyaltyToken();
+        console.log("MockRoyaltyToken deployed at:", address(royaltyToken));
+        console.log("");
+
+        // Display contract addresses being used
+        console.log("Using deployed contract addresses:");
+        console.log("  LendingPool:", LENDING_POOL);
+        console.log("  AutonomyVault:", AUTONOMY_VAULT);
+        console.log("  AutoRepayEngine:", AUTO_REPAY_ENGINE);
+        console.log("");
+
+        // Deploy StoryRoyaltySimulator with real contract addresses
+        console.log("Deploying StoryRoyaltySimulator...");
+        StoryRoyaltySimulator simulator = new StoryRoyaltySimulator(
+            address(royaltyToken),
+            AUTO_REPAY_ENGINE,
+            LENDING_POOL,
+            AUTONOMY_VAULT
+        );
+
+        console.log("\n=== Deployment Summary ===");
+        console.log("StoryRoyaltySimulator:", address(simulator));
+        console.log("MockRoyaltyToken:", address(royaltyToken));
+        console.log("AutoRepayEngine:", AUTO_REPAY_ENGINE);
+        console.log("LendingPool:", LENDING_POOL);
+        console.log("AutonomyVault:", AUTONOMY_VAULT);
+        console.log("Owner:", deployer);
+        console.log("\n=== Configuration ===");
+        console.log("Story SPG NFT:", simulator.STORY_SPG_NFT());
+        console.log(
+            "Royalty per derivative:",
+            simulator.royaltyPerDerivative()
+        );
+        console.log(
+            "Max derivatives per tx:",
+            simulator.MAX_DERIVATIVES_PER_TX()
+        );
+
+        vm.stopBroadcast();
+
+        console.log("\n=== Deployment Complete ===");
+        console.log("Copy these addresses to your .env file:");
+        console.log("STORY_ROYALTY_SIMULATOR=", address(simulator));
+        console.log("MOCK_ROYALTY_TOKEN=", address(royaltyToken));
+        console.log("\nNext steps:");
+        console.log("1. Update frontend config with new addresses");
+        console.log("2. Sync ABIs to frontend");
+        console.log("3. Test royalty simulation flow");
+    }
+}

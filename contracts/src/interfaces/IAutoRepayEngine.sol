@@ -33,4 +33,11 @@ interface IAutoRepayEngine {
         uint16 slippageBps,
         address preferredDebtAsset
     ) external returns (uint256);
+
+    /**
+     * @notice Called when IP receives new royalties (hook from RoyaltyDistributor)
+     * @param ipId Story Protocol IP identifier
+     * @param amount MOC tokens received
+     */
+    function onRoyaltyReceived(string memory ipId, uint256 amount) external;
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/IPManager.sol";
-import "../src/AutoRepayEngine.sol";
+import "../src/story/AutoRepayEngine.sol";
 import "../src/AutonomyVault.sol";
 import "../src/dev/StoryProtocolMock.sol";
 import "../src/dev/MockUniswapRouter.sol";

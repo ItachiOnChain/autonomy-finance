@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Landing } from './pages/Landing';
 import { Core } from './pages/Core';
 import { Asset } from './pages/Asset';
+import { IPMint } from './pages/IPMint';
+import RoyaltySimulator from './pages/RoyaltySimulator';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { IPMint } from './pages/IPMint';
 import { IPDashboard } from './components/IPDashboard';
 
 // -------------------------------
@@ -83,7 +84,7 @@ function App() {
               }
             />
 
-            {/* IP Minting Page */}
+            {/* Story Protocol IP Minting Routes */}
             <Route
               path="/ip-mint"
               element={
@@ -95,13 +96,24 @@ function App() {
               }
             />
 
-            {/* IP Dashboard Page */}
             <Route
               path="/ip-dashboard"
               element={
                 <Layout>
                   <ErrorBoundary>
                     <IPDashboard />
+                  </ErrorBoundary>
+                </Layout>
+              }
+            />
+
+            {/* Royalty Simulator */}
+            <Route
+              path="/royalty-simulator"
+              element={
+                <Layout>
+                  <ErrorBoundary>
+                    <RoyaltySimulator />
                   </ErrorBoundary>
                 </Layout>
               }

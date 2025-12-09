@@ -118,11 +118,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <nav className="hidden md:flex items-center gap-6 text-sm font-mono text-white/70">
             <NavItem to="/core">Dashboard</NavItem>
             <Divider />
-
             <NavItem to="/ip-mint">Mint IP</NavItem>
             <Divider />
-
-            <NavItem to="/ip-dashboard">IP Dashboard</NavItem>
+            <NavItem to="/ip-dashboard">IP Gallery</NavItem>
+            <Divider />
+            <NavItem to="/royalty-simulator">Royalty Simulator</NavItem>
           </nav>
 
           {/* WALLET BTN */}

@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "forge-std/Script.sol";
+import "../src/story/StoryRoyaltySimulator.sol";
+import "../src/tokens/MockRoyaltyToken.sol";
+
+/**
+ * @title DeployStoryRoyalty
+ * @notice Deployment script for StoryRoyaltySimulator on Aeneid testnet
+ */
+contract DeployStoryRoyalty is Script {
+    function run() external {
+        // Start broadcasting transactions
+        vm.startBroadcast();
+
+        address deployer = msg.sender;
+        console.log("Deploying from:", deployer);
+
+        // Deploy MockRoyaltyToken
+        console.log("Deploying MockRoyaltyToken...");
+        MockRoyaltyToken royaltyToken = new MockRoyaltyToken();
+        console.log("MockRoyaltyToken deployed at:", address(royaltyToken));
+
+        // For now, use deployer as placeholder for AutoRepayEngine, LendingPool, and AutonomyVault
+        // These will need to be updated to actual contract addresses
+        console.log("Using placeholder AutoRepayEngine:", deployer);
+        console.log("Using placeholder LendingPool:", deployer);
+        console.log("Using placeholder AutonomyVault:", deployer);
+
+        // Deploy StoryRoyaltySimulator
+        console.log("Deploying StoryRoyaltySimulator...");
+        StoryRoyaltySimulator simulator = new StoryRoyaltySimulator(
+            address(royaltyToken),
+            deployer, // placeholder for AutoRepayEngine
+            deployer, // placeholder for LendingPool
+            deployer // placeholder for AutonomyVault
+        );
+
+        console.log("\n=== Deployment Summary ===");
+        console.log("StoryRoyaltySimulator:", address(simulator));
+        console.log("MockRoyaltyToken:", address(royaltyToken));
+        console.log("AutoRepayEngine (placeholder):", deployer);
+        console.log("LendingPool (placeholder):", deployer);
+        console.log("AutonomyVault (placeholder):", deployer);
+        console.log("Owner:", deployer);
+        console.log("\n=== Configuration ===");
+        console.log("Story SPG NFT:", simulator.STORY_SPG_NFT());
+        console.log(
+            "Royalty per derivative:",
+            simulator.royaltyPerDerivative()
+        );
+        console.log(
+            "Max derivatives per tx:",
+            simulator.MAX_DERIVATIVES_PER_TX()
+        );
+
+        vm.stopBroadcast();
+
+        console.log("\n=== Deployment Complete ===");
+        console.log("Copy these addresses to your .env file:");
+        console.log("STORY_ROYALTY_SIMULATOR=", address(simulator));
+        console.log("MOCK_ROYALTY_TOKEN=", address(royaltyToken));
+    }
+}

@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/dev/StoryProtocolMock.sol";
 import "../src/tokens/USDC.sol";
 import "../src/tokens/MockRoyaltyToken.sol";
-import "../src/AutoRepayEngine.sol";
+import "../src/story/AutoRepayEngine.sol";
 import "../src/AutonomyVault.sol";
 import "../src/IPManager.sol";
 import "../src/dev/MockUniswapRouter.sol";

@@ -9,6 +9,61 @@ A decentralized lending and borrowing protocol with **Story Protocol IP Collater
 - 🎨 **IP Collateral**: Lock Story Protocol IP assets as collateral
 - 💰 **Royalty Auto-Repay**: Automatically repay loans using IP royalties with DEX conversion
 - 🔄 **Token Conversion**: Built-in Uniswap integration with slippage protection
+- 🎭 **Royalty Simulator**: Simulate derivative revenue distribution for Story Protocol IPs
+
+## Royalty Simulator (Aeneid Testnet)
+
+The Royalty Simulator demonstrates how derivative revenue is distributed to IP owners based on royalty percentages.
+
+### Deployed Contracts
+
+- **MockERC20**: `0x242e50f40E771da8F19aAF1b813658A8562B2ad2`
+  - Mintable token for simulating royalty payments
+  - Symbol: MRT (Mock Royalty Token)
+  - Decimals: 18
+
+- **RoyaltyDistributor**: `0x366FDba679A8ece0567C1aFFC8C543f6FE9964d5`
+  - Manages IP registration and revenue distribution
+  - Supports royalty percentages from 0-100%
+  - Integrates with lending pools for auto-repayment
+
+### Quick Demo
+
+1. **Navigate to Royalty Simulator**: Click "Royalty Simulator" in the navbar
+2. **Select IP**: Choose from your owned Story Protocol IPs
+3. **Mint Tokens** (Dev): Click "Mint Mock Tokens" to get test tokens
+4. **Simulate Revenue**:
+   - Enter revenue per derivative (e.g., 100 MRT)
+   - Enter number of derivatives (e.g., 50)
+   - Click "SIMULATE REVENUE"
+5. **View Results**: See transaction hash and updated royalty balance
+
+### For Developers
+
+**Mint Mock Tokens**:
+```bash
+cast send 0x242e50f40E771da8F19aAF1b813658A8562B2ad2 \
+  "mint(address,uint256)" \
+  <YOUR_ADDRESS> \
+  1000000000000000000000 \
+  --rpc-url https://aeneid.storyrpc.io \
+  --private-key $DEPLOYER_PRIVATE_KEY
+```
+
+**Register IP**:
+```bash
+cast send 0x366FDba679A8ece0567C1aFFC8C543f6FE9964d5 \
+  "registerIp(string,address,uint256,address)" \
+  "0x1234..." \
+  <OWNER_ADDRESS> \
+  10 \
+  0x0000000000000000000000000000000000000000 \
+  --rpc-url https://aeneid.storyrpc.io \
+  --private-key $DEPLOYER_PRIVATE_KEY
+```
+
+See [ROYALTY_SIMULATOR_DEPLOYMENT.md](./ROYALTY_SIMULATOR_DEPLOYMENT.md) for full documentation.
+
 
 ## Prerequisites
 

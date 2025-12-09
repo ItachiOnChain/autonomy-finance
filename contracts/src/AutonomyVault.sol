@@ -16,22 +16,27 @@ import "./libraries/Errors.sol";
  */
 contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
-    
+
     // State variables
     IERC20 public immutable collateralToken;
     IIPManager public ipManager;
     address public autoRepayEngine;
+    address public royaltyToken;
     
+    // IP locking state
+    mapping(address => bool) public lockedIPs;
+    mapping(address => address) public ipOwners; // IP ID => Owner address
+
     uint256 public constant MAX_LTV = 7500; // 75% in basis points
     uint256 public constant BASIS_POINTS = 10000;
-    
+
     mapping(address => Position) private positions;
-    
+
     constructor(address _collateralToken) Ownable(msg.sender) {
         if (_collateralToken == address(0)) revert Errors.ZeroAddress();
         collateralToken = IERC20(_collateralToken);
     }
-    
+
     /**
      * @notice Set the IP manager contract
      * @param _ipManager Address of IPManager contract
@@ -40,7 +45,7 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
         if (_ipManager == address(0)) revert Errors.ZeroAddress();
         ipManager = IIPManager(_ipManager);
     }
-    
+
     /**
      * @notice Set the auto repay engine contract
      * @param _autoRepayEngine Address of AutoRepayEngine contract
@@ -51,81 +56,124 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
     }
     
     /**
+     * @notice Set the royalty token contract
+     * @param _royaltyToken Address of RoyaltyToken contract
+     */
+    function setRoyaltyToken(address _royaltyToken) external onlyOwner {
+        if (_royaltyToken == address(0)) revert Errors.ZeroAddress();
+        royaltyToken = _royaltyToken;
+    }
+    
+    /**
+     * @notice Lock an IP to enable auto-repay from royalties
+     * @param ipId The Story Protocol IP identifier (address format)
+     */
+    function lockIP(address ipId) external nonReentrant {
+        require(ipId != address(0), "Invalid IP ID");
+        require(!lockedIPs[ipId], "IP already locked");
+        
+        // TODO: Verify IP ownership via Story Protocol
+        // For now, just track the owner
+        lockedIPs[ipId] = true;
+        ipOwners[ipId] = msg.sender;
+        
+        emit IPLocked(msg.sender, ipId);
+    }
+    
+    /**
+     * @notice Check if an IP is locked for auto-repay
+     * @param owner The owner address to check
+     * @return True if the owner has a locked IP
+     */
+    function isIPLocked(address owner) external view returns (bool) {
+        // Check if owner has any locked IP
+        // This is a simplified version - in production, track per-user
+        return positions[owner].hasIP;
+    }
+
+    /**
      * @notice Deposit collateral to the vault
      * @param amount Amount of collateral to deposit
      */
     function depositCollateral(uint256 amount) external nonReentrant {
         if (amount == 0) revert Errors.InvalidAmount();
-        
+
         Position storage position = positions[msg.sender];
         position.collateralAmount += amount;
-        
+
         collateralToken.safeTransferFrom(msg.sender, address(this), amount);
-        
+
         emit CollateralDeposited(msg.sender, amount);
     }
-    
+
     /**
      * @notice Withdraw collateral from the vault
      * @param amount Amount of collateral to withdraw
      */
     function withdrawCollateral(uint256 amount) external nonReentrant {
         if (amount == 0) revert Errors.InvalidAmount();
-        
+
         Position storage position = positions[msg.sender];
-        if (position.collateralAmount < amount) revert Errors.InsufficientBalance();
-        
+        if (position.collateralAmount < amount)
+            revert Errors.InsufficientBalance();
+
         // Check if withdrawal would violate LTV
         uint256 newCollateral = position.collateralAmount - amount;
         if (position.debtAmount > 0) {
             uint256 maxDebt = (newCollateral * MAX_LTV) / BASIS_POINTS;
             if (position.debtAmount > maxDebt) revert Errors.ExceedsMaxLTV();
         }
-        
+
         position.collateralAmount = newCollateral;
-        
+
         collateralToken.safeTransfer(msg.sender, amount);
-        
+
         emit CollateralWithdrawn(msg.sender, amount);
     }
-    
+
     /**
      * @notice Borrow against collateral
      * @param amount Amount to borrow
      */
     function borrow(uint256 amount) external nonReentrant {
         if (amount == 0) revert Errors.InvalidAmount();
-        
+
         Position storage position = positions[msg.sender];
-        
+
         uint256 maxBorrow = getMaxBorrowAmount(msg.sender);
         if (amount > maxBorrow) revert Errors.ExceedsMaxLTV();
-        
+
         position.debtAmount += amount;
-        
+
         // Transfer borrowed amount to user
         collateralToken.safeTransfer(msg.sender, amount);
-        
+
         emit Borrowed(msg.sender, amount);
     }
-    
+
     /**
      * @notice Repay debt
      * @param amount Amount to repay
      */
     function repay(uint256 amount) external nonReentrant {
         if (amount == 0) revert Errors.InvalidAmount();
-        
+
         Position storage position = positions[msg.sender];
         if (position.debtAmount == 0) revert Errors.NoDebt();
-        
-        uint256 repayAmount = amount > position.debtAmount ? position.debtAmount : amount;
+
+        uint256 repayAmount = amount > position.debtAmount
+            ? position.debtAmount
+            : amount;
         position.debtAmount -= repayAmount;
-        
-        collateralToken.safeTransferFrom(msg.sender, address(this), repayAmount);
-        
+
+        collateralToken.safeTransferFrom(
+            msg.sender,
+            address(this),
+            repayAmount
+        );
+
         emit Repaid(msg.sender, repayAmount);
-        
+
         // If debt is zero and IP is locked, trigger return
         if (position.debtAmount == 0 && position.hasIP) {
             ipManager.returnIP(msg.sender);
@@ -133,25 +181,31 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
             position.ipAsset = address(0);
         }
     }
-    
+
     /**
      * @notice Reduce debt (called by AutoRepayEngine)
      * @param user User whose debt to reduce
      * @param amount Amount to reduce
      */
     function reduceDebt(address user, uint256 amount) external nonReentrant {
-        if (msg.sender != address(ipManager) && msg.sender != autoRepayEngine && msg.sender != owner()) {
+        if (
+            msg.sender != address(ipManager) &&
+            msg.sender != autoRepayEngine &&
+            msg.sender != owner()
+        ) {
             revert Errors.UnauthorizedCaller();
         }
-        
+
         Position storage position = positions[user];
         if (position.debtAmount == 0) revert Errors.NoDebt();
-        
-        uint256 reductionAmount = amount > position.debtAmount ? position.debtAmount : amount;
+
+        uint256 reductionAmount = amount > position.debtAmount
+            ? position.debtAmount
+            : amount;
         position.debtAmount -= reductionAmount;
-        
+
         emit DebtReduced(user, reductionAmount, position.debtAmount);
-        
+
         // If debt is zero and IP is locked, trigger return
         if (position.debtAmount == 0 && position.hasIP) {
             ipManager.returnIP(user);
@@ -159,20 +213,21 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
             position.ipAsset = address(0);
         }
     }
-    
+
     /**
      * @notice Link IP asset to user position
      * @param user User address
      * @param ipAsset IP asset address
      */
     function linkIP(address user, address ipAsset) external {
-        if (msg.sender != address(ipManager)) revert Errors.UnauthorizedCaller();
-        
+        if (msg.sender != address(ipManager))
+            revert Errors.UnauthorizedCaller();
+
         Position storage position = positions[user];
         position.ipAsset = ipAsset;
         position.hasIP = true;
     }
-    
+
     /**
      * @notice Get user position
      * @param user User address
@@ -181,7 +236,7 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
     function getPosition(address user) external view returns (Position memory) {
         return positions[user];
     }
-    
+
     /**
      * @notice Get maximum borrow amount for user
      * @param user User address
@@ -189,11 +244,37 @@ contract AutonomyVault is IAutonomyVault, Ownable, ReentrancyGuard {
      */
     function getMaxBorrowAmount(address user) public view returns (uint256) {
         Position memory position = positions[user];
-        
+
         uint256 maxDebt = (position.collateralAmount * MAX_LTV) / BASIS_POINTS;
-        
+
         if (maxDebt <= position.debtAmount) return 0;
-        
+
         return maxDebt - position.debtAmount;
     }
+
+    /**
+     * @notice Unlock IP from vault
+     * @dev Allows user to manually unlock their IP if they have no outstanding debt
+     *      This is useful for clearing stale/invalid IP references
+     */
+    function unlockIP() external nonReentrant {
+        Position storage position = positions[msg.sender];
+
+        // Check that IP is actually locked
+        require(position.hasIP, "No IP locked");
+
+        // Check that user has no outstanding debt
+        require(position.debtAmount == 0, "Outstanding debt exists");
+
+        // Clear IP lock
+        address unlockedAsset = position.ipAsset;
+        position.hasIP = false;
+        position.ipAsset = address(0);
+
+        emit IPUnlocked(msg.sender, unlockedAsset);
+    }
+
+    // Events
+    event IPLocked(address indexed user, address indexed ipId);
+    event IPUnlocked(address indexed user, address ipAsset);
 }

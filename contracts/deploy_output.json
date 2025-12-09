@@ -1,0 +1,8 @@
+Warning: Found unknown `ignore` config for profile `default` defined in foundry.toml.
+No files changed, compilation skipped
+Error: error sending request for url (http://localhost:8545/)
+
+Context:
+- Error #0: client error (Connect)
+- Error #1: tcp connect error
+- Error #2: Connection refused (os error 111)

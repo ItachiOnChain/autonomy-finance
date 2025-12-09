@@ -29,7 +29,8 @@ import { MintBox } from '../components/asset/MintBox';
 
 
 import { AssetActions } from '../components/asset/AssetActions';
-import { AutoRepayPanel } from '../components/asset/AutoRepayPanel';
+import { AutoRepayCard } from '../components/AutoRepay/AutoRepayCard';
+// Removed: import { AutoRepayPanel } from '../components/asset/AutoRepayPanel';
 
 // ================================
 // CLEAN GLASS PANEL WRAPPER
@@ -308,11 +309,9 @@ export const Asset: React.FC = () => {
 
               <Panel>
                 <div className="p-6">
-                  <AutoRepayPanel
-                    asset={asset}
-                    assetAddress={assetAddress}
-                    userBorrowed={borrowed}
-                    onRepayComplete={handleRefresh}
+                  <AutoRepayCard
+                    borrowedToken={assetAddress as `0x${string}`}
+                    borrowedTokenSymbol={asset.symbol}
                   />
                 </div>
               </Panel>
