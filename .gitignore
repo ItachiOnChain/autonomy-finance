@@ -96,3 +96,4 @@ hardhat-cache/
 # Added during cleanup
 .parcel-cache/
 dev-anvil-state.json
+.env

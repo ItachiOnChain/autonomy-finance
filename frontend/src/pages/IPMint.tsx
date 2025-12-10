@@ -118,14 +118,6 @@ export function IPMint() {
           </>
         )}
       </div>
-
-      {/* INFO BOX */}
-      <div className="max-w-2xl mx-auto mt-6 p-4 bg-white/5 border border-white/10 rounded-xl">
-        <p className="text-xs text-white/60 leading-relaxed">
-          💡 <span className="font-bold text-[#8AE06C]">Story Protocol</span> enables you to register your creative works as on-chain IP assets.
-          Set royalty percentages and enable commercial licensing to monetize your IP.
-        </p>
-      </div>
     </div>
   );
 }

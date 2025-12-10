@@ -24,9 +24,6 @@ export function LicenseOptions({
                 <div>
                     <label className="block text-xs tracking-wider text-white/70 mb-2">
                         ROYALTY PERCENTAGE: {royaltyPercent}%
-                        <span className="ml-2 text-white/40 text-[10px]">
-                            💡 Enter 0-100%. Story Protocol expects percentage values.
-                        </span>
                     </label>
                     <input
                         type="range"
@@ -83,18 +80,9 @@ export function LicenseOptions({
                         <p className="text-sm font-bold text-white">Enable Commercial License</p>
                         <p className="text-xs text-white/60 mt-1">
                             Allow others to use your IP for commercial purposes with {royaltyPercent}% royalty share.
-                            This enables derivative works and commercial remixing. Royalty is paid as a percentage of revenue.
                         </p>
                     </div>
                 </label>
-            </div>
-
-            {/* Info */}
-            <div className="text-xs text-white/50 leading-relaxed">
-                💡 Royalties are automatically distributed when your IP is used commercially.
-                {!enableCommercialLicense && " Enable commercial license to monetize your IP."}
-                <br />
-                <span className="text-white/40">Valid range: 0-100%. Story Protocol uses percentage values for license terms.</span>
             </div>
         </div>
     );

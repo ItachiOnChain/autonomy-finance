@@ -36,7 +36,7 @@ export const LockIPButton: React.FC<LockIPButtonProps> = ({ ipId, isLocked, onSu
                 disabled
                 className="px-4 py-2 bg-gray-500 text-white rounded-md cursor-not-allowed opacity-70 flex items-center gap-2"
             >
-                <span>🔒</span> IP Locked for Auto-Repay
+                IP Locked for Auto-Repay
             </button>
         );
     }
@@ -52,7 +52,7 @@ export const LockIPButton: React.FC<LockIPButtonProps> = ({ ipId, isLocked, onSu
                     'Locking...'
                 ) : (
                     <>
-                        <span>🔒</span> Lock IP for Auto-Repay
+                        Lock IP for Auto-Repay
                     </>
                 )}
             </button>

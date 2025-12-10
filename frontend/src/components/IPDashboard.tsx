@@ -46,18 +46,7 @@ export function IPDashboard() {
 
       {/* IP GALLERY */}
       <div className="mb-12">
-        <h2 className="text-base tracking-[0.2em] font-bold mb-6 text-white uppercase">
-          YOUR IP ASSETS
-        </h2>
         <IPGallery />
-      </div>
-
-      {/* INFO BOX */}
-      <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-        <p className="text-xs text-white/60 leading-relaxed">
-          💡 Your minted IP assets are stored locally and on-chain. Each IP has a unique ID on Story Protocol.
-          Click "View on Explorer" to see your IP on the Story blockchain explorer.
-        </p>
       </div>
     </div>
   );

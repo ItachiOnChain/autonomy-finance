@@ -225,7 +225,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ coinId }) =>
     return (
         <div className="w-full relative bg-transparent rounded-lg overflow-visible">
             <div className="mb-4">
-                <h3 className="text-xl font-semibold text-white">1-Year Price Chart (USD)</h3>
+                <h3 className="text-xl font-semibold text-white">Price Chart (USD)</h3>
             </div>
 
             <div

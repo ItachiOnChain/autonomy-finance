@@ -202,7 +202,7 @@ export function AutoRepayCard({
                 shadow-[0_0_20px_rgba(138,224,108,0.12)]
             ">
                 <h3 className="text-sm text-white/60 tracking-[0.25em] uppercase mb-2">
-                    🔒 Auto-Repay Engine
+                    Auto-Repay Engine
                 </h3>
                 <p className="text-xs text-white/40 mb-4">
                     Lock your IP to automatically repay {borrowedTokenSymbol} debt with royalties

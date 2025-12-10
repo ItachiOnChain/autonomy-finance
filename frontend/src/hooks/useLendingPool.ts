@@ -282,7 +282,7 @@ export function useAssetData(assetAddress: string) {
     // These are baseline rates for the newly deployed protocol
     const storyRate = assetSymbol ? MOCK_RATES[assetSymbol as keyof typeof MOCK_RATES] : undefined;
     const finalSupplyAPR = (contractSupplyAPR === 0 && storyRate) ? (storyRate as any).supplyAPY : contractSupplyAPR;
-    const finalBorrowAPR = (contractBorrowAPR === 0 && storyRate) ? (storyRate as any).borrowAPR : contractBorrowAPR;
+    const finalBorrowAPR = ((contractBorrowAPR === 0 || contractBorrowAPR === 2) && storyRate) ? (storyRate as any).borrowAPR : contractBorrowAPR;
 
     // Log for debugging (only in development)
     if (process.env.NODE_ENV === 'development' && assetSymbol) {

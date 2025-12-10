@@ -28,9 +28,6 @@ export const Core: React.FC = () => {
           <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-[0.28em] uppercase">
             CORE INSTANCE
           </h1>
-          <p className="text-xs md:text-sm text-white/60 tracking-wide mt-2">
-            Multi-Asset Credit, Collateral & Yield Engine
-          </p>
         </div>
       </div>
 
@@ -57,9 +54,6 @@ export const Core: React.FC = () => {
             <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
               ASSETS TO SUPPLY
             </h2>
-            <p className="text-xs text-white/60 mt-1 mb-6">
-              Supply assets to earn yield & strengthen collateral.
-            </p>
 
             <div className="space-y-6">
               {supplyAssets.map((asset) => (
@@ -77,9 +71,6 @@ export const Core: React.FC = () => {
             <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
               ASSETS TO BORROW
             </h2>
-            <p className="text-xs text-white/60 mt-1 mb-6">
-              Borrow assets against your supplied collateral.
-            </p>
 
             <div className="space-y-6">
               {borrowAssets.map((asset) => (

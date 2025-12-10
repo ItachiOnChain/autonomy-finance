@@ -99,20 +99,18 @@ export default function RoyaltySimulator() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">ROYALTY SIMULATOR</h1>
-                    <p className="text-white/60">Simulate derivative revenue distribution for Story Protocol IP assets</p>
                 </div>
 
                 {/* IP Input */}
                 <div className="bg-black/50 backdrop-blur-xl border border-[#8AE06C]/25 rounded-2xl p-6 mb-6">
-                    <label className="block text-xs tracking-wider text-white/70 mb-2">IP ADDRESS (STORY PROTOCOL IP ID)</label>
+                    <label className="block text-xs tracking-wider text-white/70 mb-2">IP ADDRESS (IP ID)</label>
                     <input
                         type="text"
                         value={ipId}
                         onChange={(e) => setIpId(e.target.value)}
-                        placeholder="Paste your IP ID here (e.g., 0x1234...)"
+                        placeholder="Paste here (e.g., 0x1234...)"
                         className="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-white font-mono focus:border-[#8AE06C] focus:outline-none"
                     />
-                    <p className="text-xs text-white/40 mt-2">Enter the Story Protocol IP ID you want to simulate royalties for</p>
                 </div>
 
                 {/* Simulation Parameters */}
