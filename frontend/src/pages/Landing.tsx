@@ -75,7 +75,7 @@ const TypingWords = () => {
 
 /* ---------------- METRICS ---------------- */
 const AnimatedMetrics = () => {
-  const [tvl, setTvl] = React.useState(2000);
+  const [tvl, setTvl] = React.useState(2138218);
   const [debt, setDebt] = React.useState(1200);
   const [assets, setAssets] = React.useState(3);
 
