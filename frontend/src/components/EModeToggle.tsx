@@ -78,22 +78,30 @@ export const EModeToggle: React.FC = () => {
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
       <div className="flex items-center justify-between mb-2">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isEModeEnabled}
-            onChange={handleToggle}
-            disabled={isPending || !address}
-            className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-blue-500"
-          />
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={isEModeEnabled}
+              onChange={handleToggle}
+              disabled={isPending || !address}
+              className="sr-only peer"
+            />
+            <div className="
+              w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer 
+              peer-checked:after:translate-x-full peer-checked:after:border-white 
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+              after:bg-white after:border-gray-300 after:border after:rounded-full 
+              after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8AE06C]
+            "></div>
+          </div>
 
-          <span className="text-base font-mono tracking-wide text-white">
+          <span className="text-sm md:text-base font-mono tracking-wide text-white group-hover:text-[#8AE06C] transition-colors">
             E-Mode (Unlock Maximum LTV)
           </span>
 
-
           {isEModeEnabled && (
-            <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-sm">
+            <span className="px-2 py-0.5 bg-[#8AE06C]/20 text-[#8AE06C] border border-[#8AE06C]/30 rounded text-xs font-mono uppercase">
               {categoryLabel}
             </span>
           )}

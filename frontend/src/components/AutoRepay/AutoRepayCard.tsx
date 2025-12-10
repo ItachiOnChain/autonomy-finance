@@ -194,17 +194,17 @@ export function AutoRepayCard({
         return (
             <div className="
                 bg-black/40 
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 p-6 
                 backdrop-blur-xl
                 font-mono
                 shadow-[0_0_20px_rgba(138,224,108,0.12)]
             ">
-                <h3 className="text-sm text-white/60 tracking-[0.25em] uppercase mb-2">
+                <h3 className="text-sm text-[#8AE06C] tracking-[0.25em] uppercase mb-2">
                     Auto-Repay Engine
                 </h3>
-                <p className="text-xs text-white/40 mb-4">
+                <p className="text-xs text-[#8AE06C] mb-4">
                     Lock your IP to automatically repay {borrowedTokenSymbol} debt with royalties
                 </p>
 
@@ -216,17 +216,23 @@ export function AutoRepayCard({
                         onChange={(e) => setIpId(e.target.value)}
                         disabled={isLoading}
                         className="
-                            w-full px-4 py-3 
-                            bg-black/60 
-                            border border-white/15 
-                            rounded-lg 
-                            text-white
-                            placeholder-white/30
-                            focus:border-[#8AE06C] 
-                            focus:ring-0
-                            font-mono
-                            text-sm
-                        "
+    w-full px-4 py-3 
+    bg-black/60 
+    border border-[#8AE06C]/50 
+    rounded-lg 
+    text-white
+    placeholder-white/30
+
+    focus:border-[#8AE06C]
+    focus:outline-none
+    focus-visible:outline-none
+    focus:ring-0
+    focus:ring-transparent
+
+    font-mono
+    text-sm
+"
+
                     />
 
                     {error && (
@@ -238,8 +244,8 @@ export function AutoRepayCard({
                         disabled={isLoading || !ipId}
                         className="
                             w-full px-4 py-3 
-                            bg-[#8AE06C]/20 
-                            text-[#8AE06C]
+                            
+                            text-white
                             font-mono
                             rounded-lg 
                             border border-[#8AE06C]/40
@@ -318,7 +324,7 @@ export function AutoRepayCard({
         return (
             <div className="
                 bg-black/40 
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 p-6 
                 backdrop-blur-xl
@@ -383,7 +389,7 @@ export function AutoRepayCard({
     return (
         <div className="
             bg-black/40 
-            border border-white/10 
+            border border-[#8AE06C]/20 
             rounded-2xl 
             p-6 
             backdrop-blur-xl

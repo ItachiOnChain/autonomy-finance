@@ -414,101 +414,128 @@ const WhyAutonomy = () => {
 /* ---------------- BUILT FOR ---------------- */
 /**************************************
  *  BUILT FOR — AUTONOMY SECTION
-**************************************/
+ **************************************/
+
+import { Music, Palette, Film, BookOpen, Gamepad2, Lightbulb } from "lucide-react";
+
+const creatorRoles = [
+  {
+    title: "MUSICIANS",
+    desc: "Turn predictable royalty income into self-repaying credit.",
+    icon: Music,
+  },
+  {
+    title: "ARTISTS",
+    desc: "Borrow without selling your IP.",
+    icon: Palette,
+  },
+  {
+    title: "FILMMAKERS",
+    desc: "Autonomy automatically repays debt using incoming royalties.",
+    icon: Film,
+  },
+  {
+    title: "WRITERS",
+    desc: "Turn book, script, or content IP into self-repaying credit lines.",
+    icon: BookOpen,
+  },
+  {
+    title: "GAMERS",
+    desc: "Fund development cycles while keeping complete creative control.",
+    icon: Gamepad2,
+  },
+  {
+    title: "IMAGINATORS",
+    desc: "Your ideas → collateral → self-repaying credit.",
+    icon: Lightbulb,
+  },
+];
 
 export const BuiltFor: React.FC = () => {
-  const groups = [
-    { title: "Musicians", desc: "Turn royalties into programmable collateral." },
-    { title: "Artists", desc: "Monetize digital or physical IP with no selling." },
-    { title: "Filmmakers", desc: "Access liquidity while keeping creative control." },
-    { title: "Writers", desc: "Use book, script, or content revenue as collateral." },
-    { title: "Game Developers", desc: "Fund games using digital economies." },
-    { title: "Imagination Creators", desc: "Your ideas can power self-repaying credit." },
-  ];
-
   return (
-    <section className="w-full py-28 font-mono text-white">
+    <section className="w-full py-32 font-mono text-white">
+      <div className="max-w-[1500px] mx-auto px-6 lg:px-10">
 
-      {/* HEADER */}
-      <div className="max-w-[1500px] mx-auto px-6 lg:px-10 text-center mb-16">
-        <p className="text-sm md:text-base tracking-[0.32em] text-[#8AE06C]/85 uppercase">
-          BUILT FOR CREATORS
-        </p>
+        {/* HEADER */}
+        <div className="text-center mb-16">
+          <p className="text-sm md:text-base tracking-[0.32em] text-[#8AE06C] uppercase">
+            WHO AUTONOMY EMPOWERS
+          </p>
 
-        <h2 className="mt-3 text-lg md:text-2xl lg:text-3xl font-bold tracking-[0.32em] uppercase">
-          WHO AUTONOMY EMPOWERS
-        </h2>
-      </div>
+          <h2 className="mt-4 text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.25em] uppercase">
+            THE NEW FOUNDATION FOR CREATOR CREDIT
+          </h2>
+          
+          <p className="mt-4 text-white/60 text-sm md:text-base tracking-wide uppercase">
+            Hover on any creator type to see how Autonomy empowers them.
+          </p>
+        </div>
 
-      {/* INFINITE LOOP */}
-      <div className="relative overflow-hidden">
-        {/* FADE OVERLAYS */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#02060b] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#02060b] to-transparent z-10 pointer-events-none" />
+        {/* 6-CARD ROW (Compressed, No Scroll) */}
+        <div className="flex w-full gap-3 lg:gap-4">
+          {creatorRoles.map((r, idx) => (
+            <div
+              key={idx}
+              className="
+                flex-1 h-[280px]
+                group relative p-4 lg:p-5 rounded-xl
+                bg-black/40 border border-[#8AE06C]/40 backdrop-blur-xl
+                flex flex-col justify-between overflow-hidden
+                transition-all duration-300 ease-out
+                hover:flex-[1.5] hover:bg-black/60
+                hover:shadow-[0_0_35px_rgba(138,224,108,0.55)]
+              "
+            >
+              {/* ICON (Visible in default state) */}
+              <div className="
+                absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                text-[#8AE06C]/20 group-hover:opacity-0 transition-all duration-300
+              ">
+                <r.icon size={64} strokeWidth={1} />
+              </div>
 
-        <style>
-          {`
-            @keyframes builtForLoop {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-          `}
-        </style>
+              {/* TITLE */}
+              <h3
+                className="
+                  text-sm lg:text-base font-bold tracking-wide text-white
+                  group-hover:text-[#8AE06C] transition-colors duration-300
+                  whitespace-nowrap relative z-10
+                "
+              >
+                {r.title}
+              </h3>
 
-        <div
-          className="flex gap-8 w-max"
-          style={{ animation: "builtForLoop 20s linear infinite" }}
-        >
-          {/* Normal cycle */}
-          {groups.map((g, i) => (
-            <Card key={`row1-${i}`} title={g.title} desc={g.desc} />
-          ))}
+              {/* DEFAULT STATE: HINT */}
+              <div
+                className="
+                  absolute bottom-4 left-4
+                  text-[10px] lg:text-xs text-white/50 tracking-widest uppercase
+                  transition-all duration-300
+                  group-hover:opacity-0 group-hover:translate-y-4
+                "
+              >
+                Hover →
+              </div>
 
-          {/* Duplicate cycle */}
-          {groups.map((g, i) => (
-            <Card key={`row2-${i}`} title={g.title} desc={g.desc} />
+              {/* HOVER STATE: DESCRIPTION */}
+              <div
+                className="
+                  absolute bottom-4 left-4 right-4
+                  text-xs lg:text-sm text-white/90 leading-snug
+                  opacity-0 translate-y-4
+                  transition-all duration-300
+                  group-hover:opacity-100 group-hover:translate-y-0
+                "
+              >
+                {r.desc}
+              </div>
+            </div>
           ))}
         </div>
       </div>
     </section>
   );
 };
-
-/**************************************
- *  CARD COMPONENT — FINAL VERSION
-**************************************/
-const Card = ({ title, desc }: { title: string; desc: string }) => (
-  <div
-    className="
-      min-w-[250px]
-      h-[240px]
-      px-6 py-7
-      rounded-2xl
-
-      /* GREEN GLASS BACKGROUND */
-      
-      border border-[#8AE06C]/60
-      backdrop-blur-xl
-      shadow-[0_0_40px_rgba(138,224,108,0.35)]
-
-      flex flex-col justify-between
-      transition-all duration-300
-      hover:bg-[#8AE06C]/45
-      hover:shadow-[0_0_55px_rgba(138,224,108,0.65)]
-    "
-  >
-
-    {/* TITLE */}
-    <p className="text-lg font-semibold text-white leading-tight">
-      {title}
-    </p>
-
-    {/* DESCRIPTION */}
-    <p className="text-sm text-white/90 leading-snug">
-      {desc}
-    </p>
-  </div>
-);
 
 
 

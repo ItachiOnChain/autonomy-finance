@@ -229,7 +229,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ coinId }) =>
             </div>
 
             <div
-                className="w-full h-[300px] md:h-[400px] relative border border-white/10 rounded-lg bg-black overflow-hidden"
+                className="w-full h-[300px] md:h-[400px] relative border border-[#8AE06C]/20 rounded-lg bg-black overflow-hidden"
             >
                 <div ref={chartContainerRef} className="w-full h-full relative" />
 

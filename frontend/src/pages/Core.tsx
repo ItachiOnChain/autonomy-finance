@@ -8,6 +8,7 @@ export const Core: React.FC = () => {
   const { isConnected } = useAccount();
 
   const supplyAssets = getSupplyAssets();
+  
   const borrowAssets = getBorrowAssets();
 
   return (
@@ -24,12 +25,13 @@ export const Core: React.FC = () => {
     >
       {/* ================= HEADER ================= */}
       <div className="border-b border-white/10 bg-black/60 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-[0.28em] uppercase">
-            CORE INSTANCE
-          </h1>
-        </div>
-      </div>
+  <div className="max-w-7xl mx-auto px-6 py-10 flex justify-center">
+    <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-[0.28em] uppercase text-center text-[#8AE06C]">
+      CORE INSTANCE
+    </h1>
+  </div>
+</div>
+
 
       {/* ================= BODY ================= */}
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-16 flex-1">
@@ -51,7 +53,7 @@ export const Core: React.FC = () => {
 
           {/* ================= SUPPLY SECTION ================= */}
           <div>
-            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
+            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C] mb-8">
               ASSETS TO SUPPLY
             </h2>
 
@@ -68,7 +70,7 @@ export const Core: React.FC = () => {
 
           {/* ================= BORROW SECTION ================= */}
           <div>
-            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C]">
+            <h2 className="text-sm md:text-base font-mono tracking-[0.25em] uppercase text-[#8AE06C] mb-8">
               ASSETS TO BORROW
             </h2>
 

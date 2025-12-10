@@ -52,16 +52,23 @@ export const AssetActions: React.FC<AssetActionsProps> = ({
             onChange={(e) => onChange(e.target.value)}
             disabled={!isConnected || isProcessing}
             className="
-                w-full px-4 py-3 
-                rounded-xl 
-                bg-black/40 
-                border border-white/10 
-                text-white font-mono 
-                focus:border-[#8AE06C] 
-                focus:ring-0
-                placeholder-white/30
-                transition
-            "
+    w-full px-4 py-3 
+    rounded-xl 
+    bg-black/40 
+    border border-[#8AE06C]/50 
+    text-white font-mono 
+
+    focus:border-[#8AE06C]
+    focus:outline-none
+    focus-visible:outline-none
+    focus:ring-0
+    focus:ring-transparent
+    focus:ring-offset-0
+
+    placeholder-white/30
+    transition
+"
+
         />
     );
 
@@ -211,7 +218,7 @@ export const AssetActions: React.FC<AssetActionsProps> = ({
             className="
                 bg-black/40 
                 backdrop-blur-xl 
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 overflow-hidden 
                 shadow-[0_0_20px_rgba(138,224,108,0.08)]

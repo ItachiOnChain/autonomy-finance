@@ -22,7 +22,7 @@ export const UserPosition: React.FC<UserPositionProps> = ({ asset, position, isC
         <div
             className="
                 bg-black/40 
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 p-6 
                 backdrop-blur-xl

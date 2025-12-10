@@ -41,8 +41,10 @@ const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     rounded-2xl
     bg-black/30
     backdrop-blur-xl
-    shadow-[0_0_24px_rgba(138,224,108,0.05)]
+    shadow-[0_0_30px_rgba(138,224,108,0.15)]
+    border border-[#8AE06C]/20
     p-0
+    font-mono
   ">
     {children}
   </div>
@@ -267,7 +269,7 @@ export const Asset: React.FC = () => {
         {/* Main 3-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* LEFT 2 COLS - Info & Actions */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Reserve Overview - Full Width */}
             <Panel>
               <div className="p-6">
@@ -279,24 +281,24 @@ export const Asset: React.FC = () => {
             </Panel>
 
             {/* Interest Rates + Asset Info - Side by Side (TOP ROW) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Panel>
-                <div className="p-6">
+                <div className="p-6 h-full">
                   <InterestRates asset={asset} rates={{ supplyAPR, borrowAPR }} />
                 </div>
               </Panel>
 
               <Panel>
-                <div className="p-6">
+                <div className="p-6 h-full">
                   <AssetInfo asset={asset} />
                 </div>
               </Panel>
             </div>
 
             {/* Supply + AutoRepay - Side by Side (BOTTOM ROW) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Panel>
-                <div className="p-6">
+                <div className="p-6 h-full">
                   <AssetActions
                     asset={asset}
                     isConnected={isConnected}
@@ -327,7 +329,7 @@ export const Asset: React.FC = () => {
               </Panel>
 
               <Panel>
-                <div className="p-6">
+                <div className="p-6 h-full flex flex-col">
                   <AutoRepayCard
                     borrowedToken={assetAddress as `0x${string}`}
                     borrowedTokenSymbol={asset.symbol}

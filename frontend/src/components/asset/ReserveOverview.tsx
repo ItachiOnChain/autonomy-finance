@@ -18,7 +18,7 @@ export const ReserveOverview: React.FC<ReserveOverviewProps> = ({ asset, data })
         <div
             className="
                 bg-black/40 
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 p-6 
                 backdrop-blur-xl 

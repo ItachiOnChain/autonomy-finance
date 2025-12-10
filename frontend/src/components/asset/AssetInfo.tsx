@@ -14,7 +14,7 @@ export const AssetInfo: React.FC<AssetInfoProps> = ({ asset }) => {
             className="
                 bg-black/40 
                 backdrop-blur-xl
-                border border-white/10 
+                border border-[#8AE06C]/20 
                 rounded-2xl 
                 p-6 
                 shadow-[0_0_18px_rgba(138,224,108,0.12)]
