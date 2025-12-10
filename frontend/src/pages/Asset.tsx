@@ -312,6 +312,7 @@ export const Asset: React.FC = () => {
                   <AutoRepayCard
                     borrowedToken={assetAddress as `0x${string}`}
                     borrowedTokenSymbol={asset.symbol}
+                    decimals={asset.decimals}
                   />
                 </div>
               </Panel>

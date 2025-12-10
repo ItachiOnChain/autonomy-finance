@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { formatUnits } from 'viem';
 import type { Address } from 'viem';
 import { useAutoRepay } from '../../hooks/useAutoRepay';
 import { useRoyaltySimulator } from '../../hooks/useRoyaltySimulator';
@@ -7,12 +8,14 @@ import { useRoyaltySimulator } from '../../hooks/useRoyaltySimulator';
 interface AutoRepayCardProps {
     borrowedToken: Address;
     borrowedTokenSymbol: string;
+    decimals: number;
 }
 
-export const AutoRepayCard: React.FC<AutoRepayCardProps> = ({
+export function AutoRepayCard({
     borrowedToken,
-    borrowedTokenSymbol
-}) => {
+    borrowedTokenSymbol,
+    decimals
+}: AutoRepayCardProps) {
     const { address, isConnected } = useAccount();
     const {
         isIPLocked,
@@ -339,7 +342,7 @@ export const AutoRepayCard: React.FC<AutoRepayCardProps> = ({
                     <div className="bg-black/60 border border-white/10 rounded-lg p-4">
                         <p className="text-xs text-white/50 mb-1">Your Debt</p>
                         <p className="text-lg text-white font-bold">
-                            {(parseFloat(debt) / 1000000).toFixed(4)} {borrowedTokenSymbol}
+                            {formatUnits(BigInt(debt || '0'), decimals)} {borrowedTokenSymbol}
                         </p>
                     </div>
 
@@ -403,7 +406,7 @@ export const AutoRepayCard: React.FC<AutoRepayCardProps> = ({
                 <div className="bg-black/60 border border-white/10 rounded-lg p-4">
                     <p className="text-xs text-white/50 mb-1">Your Debt</p>
                     <p className="text-lg text-white font-bold">
-                        {(parseFloat(debt) / 1000000).toFixed(4)} {borrowedTokenSymbol}
+                        {formatUnits(BigInt(debt || '0'), decimals)} {borrowedTokenSymbol}
                     </p>
                 </div>
 

@@ -13,8 +13,8 @@ export const ROYALTY_SIMULATOR_CONTRACTS = {
     RoyaltyDistributor: '0xa00F03Ea2d0a6e4961CaAFcA61A78334049c1848' as Address
 };
 
-// Auto-Repay Engine address (v8 - fixed auto-routing over-zeroing bug)
-export const AUTO_REPAY_ENGINE = '0x60e09dB8212008106601646929360D20eFC4BE33' as Address;
+// Auto-Repay Engine address (v9 - Option B multi-token support)
+export const AUTO_REPAY_ENGINE = '0x0740BFEeAEb3c8a7b8718A4F3B20618568cDF621' as Address;
 
 export const MOCK_TOKEN_DECIMALS = 18;
 export const MOCK_TOKEN_SYMBOL = 'MRT';

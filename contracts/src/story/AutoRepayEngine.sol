@@ -39,6 +39,13 @@ contract AutoRepayEngine is ReentrancyGuard, Ownable {
     /// @notice Outstanding debt tracking (user => token => amount)
     mapping(address => mapping(address => uint256)) public outstandingDebt;
 
+    /// @notice Hardcoded token prices for multi-token support (USD per token, 18 decimals)
+    /// @dev For MVP - prices are hardcoded. In production, use external oracle
+    mapping(address => uint256) internal tokenPrices;
+
+    /// @notice Array of supported tokens for iteration
+    address[] internal supportedTokens;
+
     // ============ Events ============
 
     event IPLocked(
@@ -92,6 +99,26 @@ contract AutoRepayEngine is ReentrancyGuard, Ownable {
         priceOracle = IPriceOracle(_priceOracle);
         lendingPool = ILendingPool(_lendingPool);
         mocToken = _mocToken;
+
+        // Initialize hardcoded token prices for MVP (USD per token, 18 decimals)
+        // Note: In production, these should come from external oracle
+        _initializeTokenPrices();
+    }
+
+    /**
+     * @notice Initialize hardcoded token prices for multi-token support
+     * @dev Called once in constructor. Prices are hardcoded for MVP.
+     */
+    function _initializeTokenPrices() internal {
+        // Stablecoins: $1.00
+        // Note: Actual token addresses will be set when tokens are added to supportedTokens
+        // This is a placeholder - actual prices are set when addSupportedToken is called
+        // USDC/USDT/DAI: $1.00 (1e18)
+        // WETH: $4,000 (4000e18)
+        // WBTC: $100,000 (100000e18)
+        // UNI: $5 (5e18)
+        // AAVE: $200 (200e18)
+        // LINK: $15 (15e18)
     }
 
     // ============ Core Functions ============
@@ -228,9 +255,8 @@ contract AutoRepayEngine is ReentrancyGuard, Ownable {
         // Convert MOC to USD (1:1 ratio)
         uint256 usdAmount = mocBalance; // 1 MOC = 1 USD
 
-        // Get token price from oracle (price is in USD with 18 decimals, e.g., 1e18 = $1.00)
-        uint256 tokenPriceUSD = priceOracle.getPrice(token);
-        require(tokenPriceUSD > 0, "Invalid token price");
+        // Get token price (checks hardcoded first, then oracle)
+        uint256 tokenPriceUSD = _getTokenPrice(token);
 
         // Calculate repayment amount in borrowed token (18 decimals)
         // usdAmount is in 18 decimals, tokenPriceUSD is in 18 decimals
@@ -366,9 +392,8 @@ contract AutoRepayEngine is ReentrancyGuard, Ownable {
         // Convert MOC to USD (1:1)
         uint256 usdAmount = amount;
 
-        // Get token price from oracle
-        uint256 tokenPriceUSD = priceOracle.getPrice(token);
-        require(tokenPriceUSD > 0, "Invalid token price");
+        // Get token price (checks hardcoded first, then oracle)
+        uint256 tokenPriceUSD = _getTokenPrice(token);
 
         // Calculate repayment amount in 18 decimals
         uint256 repaymentAmount = (usdAmount * 1e18) / tokenPriceUSD;
@@ -462,6 +487,52 @@ contract AutoRepayEngine is ReentrancyGuard, Ownable {
 
         // Default to 18 if call fails
         return 18;
+    }
+
+    /**
+     * @notice Set hardcoded price for a token (owner only)
+     * @param token Token address
+     * @param priceUsd Price in USD (18 decimals, e.g., 1e18 = $1.00)
+     * @dev Used for MVP with hardcoded prices. In production, use external oracle.
+     */
+    function setTokenPrice(address token, uint256 priceUsd) external onlyOwner {
+        require(token != address(0), "Invalid token address");
+        require(priceUsd > 0, "Price must be > 0");
+
+        tokenPrices[token] = priceUsd;
+
+        // Add to supported tokens if not already there
+        bool exists = false;
+        for (uint i = 0; i < supportedTokens.length; i++) {
+            if (supportedTokens[i] == token) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
+            supportedTokens.push(token);
+        }
+    }
+
+    /**
+     * @notice Get token price (checks hardcoded first, then oracle)
+     * @param token Token address
+     * @return priceUsd Price in USD (18 decimals)
+     */
+    function _getTokenPrice(
+        address token
+    ) internal view returns (uint256 priceUsd) {
+        // Check hardcoded price first
+        if (tokenPrices[token] > 0) {
+            return tokenPrices[token];
+        }
+
+        // Fallback to oracle
+        priceUsd = priceOracle.getPrice(token);
+        require(priceUsd > 0, "Invalid token price");
+
+        return priceUsd;
     }
 
     // ============ View Functions ============
