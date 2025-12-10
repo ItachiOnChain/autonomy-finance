@@ -1,4 +1,5 @@
 import React from 'react';
+import { TokenLogo } from '../TokenLogo';
 import { useNavigate } from 'react-router-dom';
 import { useAccount, usePublicClient, useChainId } from 'wagmi';
 import { getContracts } from '../../config/contracts';
@@ -51,7 +52,7 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
 
                     {/* Icon */}
                     <div className="text-5xl drop-shadow-[0_0_10px_rgba(138,224,108,0.35)]">
-                        {asset.logo}
+                        <TokenLogo symbol={asset.symbol} size={48} />
                     </div>
 
                     {/* Name */}

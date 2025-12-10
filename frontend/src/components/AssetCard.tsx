@@ -1,4 +1,5 @@
 import React from "react";
+import { TokenLogo } from "./TokenLogo";
 import { Link } from "react-router-dom";
 import { formatUnits } from "viem";
 import { ASSETS } from "../config/assets";
@@ -52,7 +53,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ symbol, type }) => {
       <div className="flex items-center justify-between mb-4">
         {/* Asset Icon + Name */}
         <div className="flex items-center gap-3">
-          <div className="text-3xl">{asset.logo}</div>
+          <TokenLogo symbol={asset.symbol} size={40} />
 
           <div>
             <div className="font-mono text-white text-base tracking-wide">

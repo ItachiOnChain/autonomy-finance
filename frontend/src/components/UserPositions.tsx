@@ -1,3 +1,4 @@
+import { TokenLogo } from "./TokenLogo";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +34,7 @@ const UserPositionRow = ({ symbol, type }: any) => {
     >
       {/* Icon + Name */}
       <div className="flex items-center gap-3">
-        <div className="text-2xl">{asset.logo}</div>
+        <TokenLogo symbol={asset.symbol} size={28} />
         <div>
           <div className="text-white text-sm font-mono">{asset.symbol}</div>
           <div className="text-[10px] text-white/40 font-mono">{asset.name}</div>
