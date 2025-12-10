@@ -25,8 +25,8 @@ export const Core: React.FC = () => {
     >
       {/* ================= HEADER ================= */}
       <div className="border-b border-white/10 bg-black/60 backdrop-blur-xl">
-  <div className="max-w-7xl mx-auto px-6 py-10 flex justify-center">
-    <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-[0.28em] uppercase text-center text-[#8AE06C]">
+  <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 flex justify-center">
+    <h1 className="text-2xl md:text-3xl lg:text-4xl font-mono font-bold tracking-[0.28em] uppercase text-center text-[#8AE06C]">
       CORE INSTANCE
     </h1>
   </div>
@@ -34,14 +34,14 @@ export const Core: React.FC = () => {
 
 
       {/* ================= BODY ================= */}
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16 flex-1">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-10 md:space-y-16 flex-1">
 
         {/* USER POSITIONS (ONLY IF WALLET CONNECTED) */}
         {isConnected && (
           <div
             className="
               bg-black/40 border border-[#8AE06C]/25 
-              rounded-2xl p-8 backdrop-blur-xl
+              rounded-2xl p-4 md:p-8 backdrop-blur-xl
               shadow-[0_0_35px_rgba(138,224,108,0.18)]
             "
           >
@@ -49,7 +49,7 @@ export const Core: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
           {/* ================= SUPPLY SECTION ================= */}
           <div>

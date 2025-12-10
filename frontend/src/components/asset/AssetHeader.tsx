@@ -48,7 +48,7 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
                 </button>
 
                 {/* Header Row */}
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
 
                     {/* Icon */}
                     <div className="text-5xl drop-shadow-[0_0_10px_rgba(138,224,108,0.35)]">
@@ -66,7 +66,7 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
                     </div>
 
                     {/* Right Panel */}
-                    <div className="ml-auto flex flex-col items-end">
+                    <div className="ml-0 md:ml-auto w-full md:w-auto flex flex-col items-start md:items-end mt-4 md:mt-0">
 
                         {/* Refresh Button */}
                         <button
@@ -92,7 +92,7 @@ export const AssetHeader: React.FC<AssetHeaderProps> = ({ asset, onRefresh }) =>
                         </span>
 
                         {/* Metadata */}
-                        <div className="text-[10px] text-white/40 mt-2 text-right leading-tight">
+                        <div className="text-[10px] text-white/40 mt-2 text-left md:text-right leading-tight">
                             <div>Chain: {publicClient?.chain?.id}</div>
                             <div>
                                 Wallet:{" "}

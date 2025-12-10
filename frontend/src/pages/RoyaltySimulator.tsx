@@ -43,7 +43,7 @@ const RoyaltyFlowAnimation = () => {
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      <div className="relative w-[420px] h-[400px] flex items-center justify-center">
+      <div className="relative w-[420px] h-[400px] flex items-center justify-center scale-75 md:scale-100 origin-center">
         {popups.map((popup: any) => (
           <div
             key={popup.id}
@@ -174,7 +174,7 @@ export default function RoyaltySimulator() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-6 pb-24 flex flex-col lg:flex-row gap-16">
+      <div className="max-w-7xl mx-auto px-6 pb-24 flex flex-col lg:flex-row gap-10 lg:gap-16">
 
         {/* LEFT CARD — BIGGER + GLOWING PREMIUM */}
         <div className="w-full lg:w-[48%]">
@@ -294,7 +294,7 @@ export default function RoyaltySimulator() {
         </div>
 
         {/* RIGHT SIDE ANIMATION */}
-        <div className="w-full lg:w-[52%] h-[550px] flex items-center justify-center">
+        <div className="hidden lg:flex w-full lg:w-[52%] h-[550px] items-center justify-center">
           <RoyaltyFlowAnimation />
         </div>
       </div>

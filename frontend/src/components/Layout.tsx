@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { useTheme } from "../App";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Link, useLocation } from "react-router-dom";
@@ -86,8 +87,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   useTheme();
   const location = useLocation();
   const isLanding = location.pathname === "/";
-  // Debug log
-  // console.log('[Layout] Path:', location.pathname, 'isLanding:', isLanding);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  React.useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
 
   return (
@@ -126,10 +131,30 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
 
           {/* WALLET BTN */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <NavConnectButton />
+
+            {/* MOBILE MENU TOGGLE */}
+            <button
+              className="md:hidden text-white/70 hover:text-[#8AE06C] transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+
+        {/* MOBILE MENU OVERLAY */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-6 shadow-2xl animate-in slide-in-from-top-5 duration-200">
+            <nav className="flex flex-col gap-4 text-base font-mono text-white/80">
+              <NavItem to="/core">Dashboard</NavItem>
+              <NavItem to="/ip-mint">Mint IP</NavItem>
+              <NavItem to="/ip-dashboard">IP Gallery</NavItem>
+              <NavItem to="/royalty-simulator">Royalty Simulator</NavItem>
+            </nav>
+          </div>
+        )}
       </header>
 
 

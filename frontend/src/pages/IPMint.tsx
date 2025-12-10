@@ -73,7 +73,7 @@ export function IPMint() {
         REGISTER YOUR CREATIVE IP ON STORY PROTOCOL
       </h2>
 
-      <div className="max-w-2xl mx-auto p-8 rounded-2xl bg-black/50 backdrop-blur-xl border border-[#8AE06C]/25 shadow-[0_0_30px_rgba(138,224,108,0.25)]">
+      <div className="max-w-2xl mx-auto p-4 md:p-8 rounded-2xl bg-black/50 backdrop-blur-xl border border-[#8AE06C]/25 shadow-[0_0_30px_rgba(138,224,108,0.25)]">
 
         {/* WALLET NOT CONNECTED */}
         {!isConnected && (

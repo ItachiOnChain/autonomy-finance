@@ -28,7 +28,8 @@ export const MintPanel: React.FC<MintPanelProps> = ({
                 p-6 
                 backdrop-blur-xl
                 font-mono
-                shadow-[0_0_20px_rgba(138,224,108,0.12)]
+                shadow-[0_0_20px_rgba
+                (138,224,108,0.12)]
             "
         >
             <h3 className="text-sm text-white/60 tracking-[0.25em] uppercase mb-2">

@@ -355,10 +355,10 @@ const WhyAutonomy = () => {
 
         </div>
 
-        <div className="w-full flex items-center justify-center relative">
+        <div className="w-full flex flex-col lg:flex-row items-center justify-center relative gap-8 lg:gap-0">
 
           {/* LEFT FEATURES */}
-          <div className="hidden lg:flex flex-col space-y-8 mr-10">
+          <div className="flex flex-col space-y-8 lg:mr-10 order-2 lg:order-1 w-full lg:w-auto items-center lg:items-end text-center lg:text-right">
             {left.map((f, i) => (
               <div
                 key={i}
@@ -380,8 +380,9 @@ const WhyAutonomy = () => {
               border border-[#8AE06C]/30 bg-black/40 backdrop-blur-xl
               shadow-[0_25px_80px_-10px_rgba(138,224,108,0.4)]
               transition-all duration-500
-              ${hover ? "w-[50%]" : "w-[90%]"}
+              ${hover ? "w-[90%] lg:w-[50%]" : "w-[90%]"}
               max-w-[900px] aspect-[16/6]
+              order-1 lg:order-2
             `}
           >
             <img src="/green1.png" className="w-full h-full object-cover" />
@@ -392,7 +393,7 @@ const WhyAutonomy = () => {
           </div>
 
           {/* RIGHT FEATURES */}
-          <div className="hidden lg:flex flex-col space-y-8 ml-10">
+          <div className="flex flex-col space-y-8 lg:ml-10 order-3 lg:order-3 w-full lg:w-auto items-center lg:items-start text-center lg:text-left">
             {right.map((f, i) => (
               <div
                 key={i}
@@ -471,18 +472,18 @@ export const BuiltFor: React.FC = () => {
           </p>
         </div>
 
-        {/* 6-CARD ROW (Compressed, No Scroll) */}
-        <div className="flex w-full gap-3 lg:gap-4">
+        {/* 6-CARD ROW (Responsive Grid -> Flex) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex w-full gap-4 lg:gap-4">
           {creatorRoles.map((r, idx) => (
             <div
               key={idx}
               className="
-                flex-1 h-[280px]
+                lg:flex-1 h-[280px]
                 group relative p-4 lg:p-5 rounded-xl
                 bg-black/40 border border-[#8AE06C]/40 backdrop-blur-xl
                 flex flex-col justify-between overflow-hidden
                 transition-all duration-300 ease-out
-                hover:flex-[1.5] hover:bg-black/60
+                lg:hover:flex-[1.5] hover:bg-black/60
                 hover:shadow-[0_0_35px_rgba(138,224,108,0.55)]
               "
             >
