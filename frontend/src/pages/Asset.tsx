@@ -30,6 +30,7 @@ import { MintBox } from '../components/asset/MintBox';
 
 import { AssetActions } from '../components/asset/AssetActions';
 import { AutoRepayCard } from '../components/AutoRepay/AutoRepayCard';
+import CandlestickChart from '../components/CandlestickChart';
 // Removed: import { AutoRepayPanel } from '../components/asset/AutoRepayPanel';
 
 // ================================
@@ -46,6 +47,17 @@ const Panel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     {children}
   </div>
 );
+
+const COINGECKO_IDS: Record<string, string> = {
+  'WETH': 'weth',
+  'USDC': 'usd-coin',
+  'USDT': 'tether',
+  'DAI': 'dai',
+  'WBTC': 'wrapped-bitcoin',
+  'LINK': 'chainlink',
+  'UNI': 'uniswap',
+  'AAVE': 'aave'
+};
 
 export const Asset: React.FC = () => {
   const { symbol } = useParams<{ symbol: string }>();
@@ -244,6 +256,13 @@ export const Asset: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Price Chart */}
+        <Panel>
+          <div className="p-6">
+            <CandlestickChart coinId={COINGECKO_IDS[asset.symbol] || 'bitcoin'} />
+          </div>
+        </Panel>
 
         {/* Main 3-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
