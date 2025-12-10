@@ -67,6 +67,14 @@ export function ipfsToGatewayUrls(ipfsURI: string): string[] {
         const parts = cid.split('/ipfs/');
         cid = parts[1] || cid;
     }
+    // Handle subdomain gateways (e.g. https://bafy...ipfs.dweb.link)
+    else if (cid.includes('.ipfs.')) {
+        // Extract CID from subdomain
+        const matches = cid.match(/https?:\/\/([^.]+)\.ipfs\./);
+        if (matches && matches[1]) {
+            cid = matches[1];
+        }
+    }
 
     // Remove any trailing slashes or query params but preserve full CID
     cid = cid.split('?')[0].split('#')[0].replace(/\/+$/, '');
@@ -77,7 +85,11 @@ export function ipfsToGatewayUrls(ipfsURI: string): string[] {
         `https://gateway.pinata.cloud/ipfs/${cid}`,
         `https://ipfs.io/ipfs/${cid}`,
         `https://cf-ipfs.com/ipfs/${cid}`,
-        `https://dweb.link/ipfs/${cid}`
+        `https://dweb.link/ipfs/${cid}`,
+        `https://flk-ipfs.xyz/ipfs/${cid}`,
+        `https://nftstorage.link/ipfs/${cid}`,
+        `https://4everland.io/ipfs/${cid}`,
+        `https://w3s.link/ipfs/${cid}`
     ];
 }
 

@@ -37,4 +37,5 @@ export interface PreparedMetadata {
     ipMetadataHash: string;
     nftMetadataURI: string;
     nftMetadataHash: string;
+    imageURI: string; // Direct URI to the image file
 }

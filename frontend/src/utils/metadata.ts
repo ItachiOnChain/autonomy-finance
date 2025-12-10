@@ -110,6 +110,7 @@ export async function prepareIPMetadata(
         ipMetadataURI,
         ipMetadataHash,
         nftMetadataURI,
-        nftMetadataHash
+        nftMetadataHash,
+        imageURI: fileURI
     };
 }
