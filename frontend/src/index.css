@@ -57,3 +57,23 @@ body {
     background-position: 300px 300px;
   }
 }
+/* Royalty Simulator Animations */
+@keyframes tokenFall {
+  0% { transform: translate(-50%, -250px) scale(0.5); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(-50%, 80px) scale(0.8); opacity: 0; }
+}
+.animate-tokenFall {
+  animation: tokenFall 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes popupFade {
+    0% { opacity: 0; transform: translate(var(--tw-translate-x), calc(var(--tw-translate-y) + 20px)) scale(0.9); }
+    10% { opacity: 1; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scale(1); }
+    90% { opacity: 1; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tw-translate-x), calc(var(--tw-translate-y) - 20px)) scale(0.9); }
+}
+.animate-popupFade {
+    animation: popupFade 3s ease-in-out forwards;
+}
