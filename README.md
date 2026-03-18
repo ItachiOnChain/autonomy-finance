@@ -9,7 +9,7 @@ A decentralized lending and borrowing protocol with **Story Protocol IP Collater
 - 🎨 **IP Collateral**: Lock Story Protocol IP assets as collateral
 - 💰 **Royalty Auto-Repay**: Automatically repay loans using IP royalties with DEX conversion
 - 🔄 **Token Conversion**: Built-in Uniswap integration with slippage protection
-- 🎭 **Royalty Simulator**: Simulate derivative revenue distribution for Story Protocol IPs
+
 
 ## Supported Networks
 
