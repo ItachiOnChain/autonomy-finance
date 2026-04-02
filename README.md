@@ -2,6 +2,8 @@
 
 A decentralized lending and borrowing protocol with **Story Protocol IP Collateral + Royalty-Driven Auto-Repay** integration.
 
+**Demo Video:** https://www.loom.com/share/a8b4bd76d2e24f7e8b44afbca5333abb
+
 ## Features
 
 - 🏦 **Multi-Asset Lending**: Supply and borrow USDC, USDT, DAI, WETH, WBTC, and more
